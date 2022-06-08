@@ -7,7 +7,7 @@ def click(x, y):
 
 
 def verificaTela():
-    button_pos = pyautogui.locateOnScreen('botaoAceitarOk.png', confidence=0.8)
+    button_pos = pyautogui.locateOnScreen('button.png', confidence=0.8)
     if button_pos != None:
         click(button_pos.left + 80, button_pos.top + 20)
         return True
