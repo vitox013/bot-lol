@@ -3,7 +3,7 @@ import time
 
 def click(x, y):
     pyautogui.moveTo(x, y)
-    pyautogui.click
+    pyautogui.click()
 
 
 def verificaTela():
@@ -14,7 +14,7 @@ def verificaTela():
     return False
 
 def verificaInicio():
-    image_pos = pyautogui.locateOnScreen('verificaInicio.png', confidence=0.9)
+    image_pos = pyautogui.locateOnScreen('verificaInicio.png', confidence=0.8)
     if image_pos != None:
         return False
     return True
@@ -22,6 +22,7 @@ def verificaInicio():
 
 def main():
     while verificaInicio():
+        time.sleep(2)
         verificaTela()
         print('Aguardando para aceitar')   
 
