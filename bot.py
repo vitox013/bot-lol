@@ -29,6 +29,7 @@ def buttonConfirm():
     time.sleep(1)
     buttonC = pyautogui.locateOnScreen('imgs/buttonConfirmLigado.png', confidence=0.8)
     click(buttonC.left + 50, buttonC.top + 30)
+    print("Champion selecionado")
 
 def verificaTela():
     button_pos = pyautogui.locateOnScreen('imgs/button.png', confidence=0.8)
@@ -126,7 +127,7 @@ def verificaInicio():
 
 def main():
 
-    print("\n\nBot criado por Viteeeera (https://github.com/vitox013/bot-lol)\n\nVá lá no banheiro que o bot aceitará sozinho caso ache uma partida\n\nO programa fechará sozinho quando a tela de loading começar, mas caso queira fechar antes é só pressionar DEL.")
+    print("\n\nBot criado por Viteeeera (https://github.com/vitox013/bot-lol)\n\nVá lá no banheiro que o bot aceitará sozinho caso ache uma partida\n\nO programa fechará sozinho quando a tela de loading começar, mas caso queira fechar antes é só pressionar CTRL+C no terminal")
 
     opcao1 = input('\n\nPrimeira opcao de champion: \n')
     ban = input('\n\nBanir quem? \n')
