@@ -17,7 +17,7 @@ def janelaInicial():
         [sg.Image('imgs/okTeemo.png')],
         [sg.Text('Vá lá buscar seu café que eu aceito a fila')]
     ]
-    return sg.Window('Queue Acceptor', layout, finalize=True,size=(360, 260), location=(2, 300),element_padding=20, font=("Arial", 11), element_justification='c')
+    return sg.Window('Queue Acceptor', layout, finalize=True,size=(360, 260), location=(-500, 300),element_padding=20, font=("Arial", 11), element_justification='c')
 
 def janelaChampions():
     sg.theme("DarkBlue")
@@ -30,7 +30,7 @@ def janelaChampions():
         [sg.Input(key='ban')],
         [sg.Column([[sg.Button('Iniciar BOT', font="Arial, 11", bind_return_key=True, pad=(0, 10))]], justification='center')]
     ]
-    return sg.Window('Informe os Campeões', layout, finalize=True, size=(360, 260), location=(2, 300), font=("Arial", 11), margins=(10, 20))
+    return sg.Window('Informe os Campeões', layout, finalize=True, size=(360, 260), location=(-500, 300), font=("Arial", 11), margins=(10, 20))
 
 def botTrabalhando():
     sg.theme("DarkBlue")
@@ -40,7 +40,7 @@ def botTrabalhando():
         [sg.Text('',key='mensagem')],
         [sg.Button('Parar Bot', button_color=('white', 'red'))]
     ]
-    return sg.Window('Bot rodando', layout, finalize=True, size=(360, 350),location=(2, 300), element_padding=8, font="Arial, 11", element_justification='c')
+    return sg.Window('Bot rodando', layout, finalize=True, size=(360, 350),location=(-500, 300), element_padding=8, font="Arial, 11", element_justification='c')
 
 # ======================= BOT =================================
 def click(x, y):
@@ -95,6 +95,7 @@ def verificaSeTodosAceitaram():
             return True
         flagNao = pyautogui.locateOnScreen('imgs/retornouFila.png', confidence=0.8)
         if flagNao != None:
+            atualizaMsg('Recusaram, aguardando partida para aceitar')
             return False
 
 def guardarImgChampion():
@@ -193,12 +194,14 @@ def atualizaMsg(mensagem):
     readWindows()
 
 def readWindows():
-    global window, event, escolhas
-    window, event,escolhas = sg.read_all_windows(timeout=1)
+    global window 
+    global event 
+    global values
+    window, event,values = sg.read_all_windows(timeout=1)
 
 
 janela3 = janelaInicial()
-window, event,escolhas = sg.read_all_windows(timeout=5000)
+window, event, values = sg.read_all_windows(timeout=5000)
 if event == sg.WINDOW_CLOSED:
     sys.exit()
 elif event.startswith("URL "):
@@ -206,7 +209,9 @@ elif event.startswith("URL "):
 janela3.close()
 
 janela1 = janelaChampions()
-window, event,escolhas = sg.read_all_windows()
+print('passei linha 211')
+window,event,values = sg.read_all_windows()
+print("passei linha 212")
 if event == sg.WINDOW_CLOSED:
         sys.exit()
 janela2 = botTrabalhando()
@@ -219,13 +224,13 @@ while not partidaIniciada:
     janela2.Element('_IMAGE_').UpdateAnimation('imgs/dwightPc.gif',  time_between_frames=0)
     if verificaTela():
         if verificaSeTodosAceitaram():
-            img = declareChampion(escolhas['opcao1'])
-            banChampion(escolhas['ban'])
+            img = declareChampion(values['opcao1'])
+            banChampion(values['ban'])
             banido = verificaSeChampFoiBanido(img)
             if banido == True:
-                championSelect(escolhas['opcao2'])
+                championSelect(values['opcao2'])
             else:
-                championSelect(escolhas['opcao1'])
+                championSelect(values['opcao1'])
             partidaIniciada = True
 atualizaMsg('Partida será iniciada! Boa sorte!')
 time.sleep(3)
