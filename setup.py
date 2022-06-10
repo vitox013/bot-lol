@@ -10,7 +10,7 @@ if sys.platform == "win32":
 
 setup(
     name="lol queue acceptor",
-    version="3.0.1",
+    version="3.0.0",
     description="Interface gráfica adicionada",
     options={"build_exe": build_exe_options},
     executables=[Executable(script="bot.py", base= "WIN32GUI", icon="botIcon.ico")],

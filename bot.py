@@ -36,11 +36,20 @@ def botTrabalhando():
     sg.theme("DarkBlue")
     layout = [
         [sg.Text("Bot está trabalhando!")],
-        [sg.Image("imgs/dwightPc.gif", key="_IMAGE_")],
+        [sg.Image("imgs/emote.png")],
         [sg.Text('',key='mensagem')],
         [sg.Button('Parar Bot', button_color=('white', 'red'))]
     ]
-    return sg.Window('Bot rodando', layout, finalize=True, size=(360, 350),location=(-500, 300), element_padding=8, font="Arial, 11", element_justification='c')
+    return sg.Window('Bot rodando', layout, finalize=True, size=(360, 260),location=(-500, 300), element_padding=20, font="Arial, 11", element_justification='c')
+
+def easterEgg():
+    sg.theme("DarkRed2")
+    layout = [
+        [sg.Text("POR FAVOR NAO FEEDE DE YASUO")],
+        [sg.Text("NO MID IGUAL O CHRIS IRADO")],
+        
+    ]
+    return sg.Window('NAO FEEDE PFV', layout, finalize=True, size=(360, 260),location=(-500, 300), element_padding=30, font="Arial, 13", element_justification='c', margins=(0,0))
 
 # ======================= BOT =================================
 def click(x, y):
@@ -181,12 +190,18 @@ def championSelect(opcao):
     buttonConfirm()
 
 def verificaInicio():
-    image_pos = pyautogui.locateOnScreen('imgs/verificaInicio.png', confidence=0.8)
-    image_pos2 = pyautogui.locateOnScreen('imgs/verificaInicio2.png', confidence=0.8)
-    image_pos3 = pyautogui.locateOnScreen('imgs/verificaInicio3.png', confidence=0.8)
-    if image_pos != None or image_pos2 != None or image_pos3 != None:
-        return False
-    return True
+    while True:
+        readWindows()
+        if event == sg.WIN_CLOSED or event == 'Parar Bot':
+            sys.exit()
+        retornouFila = pyautogui.locateOnScreen('imgs/retornouFila.png', confidence=0.8)
+        if retornouFila != None:
+            return False
+        image_pos = pyautogui.locateOnScreen('imgs/verificaInicio.png', confidence=0.8)
+        image_pos2 = pyautogui.locateOnScreen('imgs/verificaInicio2.png', confidence=0.8)
+        image_pos3 = pyautogui.locateOnScreen('imgs/verificaInicio3.png', confidence=0.8)
+        if image_pos != None or image_pos2 != None or image_pos3 != None:
+            return True
 
 def atualizaMsg(mensagem):
     global janela2
@@ -197,11 +212,11 @@ def readWindows():
     global window 
     global event 
     global values
-    window, event,values = sg.read_all_windows(timeout=1)
+    window, event, values = sg.read_all_windows(timeout=1)
 
 
 janela3 = janelaInicial()
-window, event, values = sg.read_all_windows(timeout=5000)
+window, event, escolhas = sg.read_all_windows(timeout=5000)
 if event == sg.WINDOW_CLOSED:
     sys.exit()
 elif event.startswith("URL "):
@@ -209,29 +224,34 @@ elif event.startswith("URL "):
 janela3.close()
 
 janela1 = janelaChampions()
-print('passei linha 211')
 window,event,values = sg.read_all_windows()
-print("passei linha 212")
+escolhas = values
+
+if escolhas['opcao1'].lower() == 'yasuo':
+    easter = easterEgg()
+    window, event, escolhas = sg.read_all_windows(timeout=3000)
+easter.close()
+
 if event == sg.WINDOW_CLOSED:
         sys.exit()
 janela2 = botTrabalhando()
 janela1.close()
 atualizaMsg('Aguardando encontrar partida para aceitar')
 readWindows()
-
 partidaIniciada = False
+
 while not partidaIniciada:
-    janela2.Element('_IMAGE_').UpdateAnimation('imgs/dwightPc.gif',  time_between_frames=0)
     if verificaTela():
         if verificaSeTodosAceitaram():
-            img = declareChampion(values['opcao1'])
-            banChampion(values['ban'])
+            img = declareChampion(escolhas['opcao1'])
+            banChampion(escolhas['ban'])
             banido = verificaSeChampFoiBanido(img)
             if banido == True:
-                championSelect(values['opcao2'])
+                championSelect(escolhas['opcao2'])
             else:
-                championSelect(values['opcao1'])
-            partidaIniciada = True
+                championSelect(escolhas['opcao1'])
+            if verificaInicio():
+                partidaIniciada = True
 atualizaMsg('Partida será iniciada! Boa sorte!')
 time.sleep(3)
 atualizaMsg('Aplicativo será fechado! Até mais!')
