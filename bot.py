@@ -6,34 +6,41 @@ import pyautogui
 import time
 import PySimpleGUI as sg
 import sys
+import webbrowser
+
+url = 'https://github.com/vitox013'
 
 def janelaInicial():
-    sg.theme('Reddit')
+    sg.theme("DarkBlue")
     layout = [
-        [sg.Text("Bot criado por Viteeeera (https://github.com/vitox013/bot-lol)\n\nVá lá no banheiro que o bot aceitará sozinho caso ache uma partida")]
+        [sg.Text('Bot criado por viteeera (GitHub)', tooltip=url, enable_events=True,key=f'URL {url}', font=("Arial", 11, "underline"))],
+        [sg.Image('imgs/okTeemo.png')],
+        [sg.Text('Vá lá buscar seu café que eu aceito a fila')]
     ]
+    return sg.Window('Queue Acceptor', layout, finalize=True,size=(360, 260), location=(2, 300),element_padding=20, font=("Arial", 11), element_justification='c')
 
 def janelaChampions():
-    sg.theme('Reddit')
+    sg.theme("DarkBlue")
     layout = [
         [sg.Text("Primeira opção de campeão:")],
-        [sg.Input(key='opcao1',)],
-        [sg.Text("Segunda opção de campeão:")],
+        [sg.Input(key='opcao1')],
+        [sg.Text("Segunda opção de campeão(caso 1° seja banido):")],
         [sg.Input(key='opcao2')],
         [sg.Text("Banir quem?")],
         [sg.Input(key='ban')],
-        [sg.Button('Iniciar BOT', font="Arial, 11")]
+        [sg.Column([[sg.Button('Iniciar BOT', font="Arial, 11", bind_return_key=True, pad=(0, 10))]], justification='center')]
     ]
-    return sg.Window('Informe os Campeões', layout, finalize=True, size=(310, 260), location=(2, 300), element_justification='c',element_padding=5, font="Arial, 11")
+    return sg.Window('Informe os Campeões', layout, finalize=True, size=(360, 260), location=(2, 300), font=("Arial", 11), margins=(10, 20))
 
 def botTrabalhando():
-    sg.theme('Reddit')
+    sg.theme("DarkBlue")
     layout = [
         [sg.Text("Bot está trabalhando!")],
+        [sg.Image("imgs/dwightPc.gif", key="_IMAGE_")],
         [sg.Text('',key='mensagem')],
-        [sg.Button('Parar Bot', button_color=('white', 'red'), )]
+        [sg.Button('Parar Bot', button_color=('white', 'red'))]
     ]
-    return sg.Window('Bot rodando', layout, finalize=True, size=(310, 260),location=(2, 300), element_justification='c', element_padding=5, font="Arial, 11")
+    return sg.Window('Bot rodando', layout, finalize=True, size=(360, 350),location=(2, 300), element_padding=8, font="Arial, 11", element_justification='c')
 
 # ======================= BOT =================================
 def click(x, y):
@@ -60,13 +67,12 @@ def buttonConfirm():
     time.sleep(1)
     buttonC = pyautogui.locateOnScreen('imgs/buttonConfirmLigado.png', confidence=0.8)
     click(buttonC.left + 50, buttonC.top + 30)
-    print("Champion selecionado")
+    atualizaMsg("Champion selecionado")
 
 def verificaTela():
     readWindows()
-    if event == sg.WIN_CLOSED:
+    if event == sg.WIN_CLOSED or event == 'Parar Bot':
         sys.exit()
-    print('Procurando partida')
     button_pos = pyautogui.locateOnScreen('imgs/button.png', confidence=0.8)
     if button_pos != None:
         if button_pos != None:
@@ -75,15 +81,13 @@ def verificaTela():
             pyautogui.moveTo(button_pos.left -30, button_pos.top + 100)
             atualizaMsg("Partida encontrada e aceita")
         return True
-    print('nao achei')
     return False
 
 def verificaSeTodosAceitaram():
     atualizaMsg("Verificando se todos aceitaram")
-    print('Verificando se todos aceitaram')
     while True:
         readWindows()
-        if event == sg.WIN_CLOSED:
+        if event == sg.WIN_CLOSED or event == 'Parar Bot':
             sys.exit()
         flag = pyautogui.locateOnScreen('imgs/flagTodosAceitaram.png', confidence=0.8)
         if flag != None:
@@ -104,7 +108,7 @@ def declareChampion(champion):
     while declareImg == None and not verificaTela():
         declareImg = pyautogui.locateOnScreen('imgs/declareChampion.png', confidence=0.8)
         readWindows()
-        if event == sg.WIN_CLOSED:
+        if event == sg.WIN_CLOSED or event == 'Parar Bot':
             sys.exit()
 
     time.sleep(2)    
@@ -122,7 +126,7 @@ def banChampion(championBan):
     while ban == None and not verificaTela():
         ban = pyautogui.locateOnScreen('imgs/ban.png', confidence=0.8)
         readWindows()
-        if event == sg.WIN_CLOSED:
+        if event == sg.WIN_CLOSED or event == 'Parar Bot':
             sys.exit()
     time.sleep(2)
     search()
@@ -137,7 +141,7 @@ def verificaSeChampFoiBanido(champion):
     while True:
         aguardando = pyautogui.locateOnScreen('imgs/banimentosconfirmados.png', confidence=0.8)
         readWindows()
-        if event == sg.WIN_CLOSED:
+        if event == sg.WIN_CLOSED or event == 'Parar Bot':
             sys.exit()
         if aguardando != None:
             break
@@ -145,7 +149,7 @@ def verificaSeChampFoiBanido(champion):
 
     while True:
         readWindows()
-        if event == sg.WIN_CLOSED:
+        if event == sg.WIN_CLOSED or event == 'Parar Bot':
             sys.exit()
         img = pyautogui.locateOnScreen(champion, confidence=0.8)
         aguardando = pyautogui.locateOnScreen('imgs/banimentosconfirmados.png', confidence=0.8)
@@ -161,7 +165,7 @@ def championSelect(opcao):
     atualizaMsg("Esperando minha vez para selecionar")
     while confirmar1 == None and not verificaTela():
         readWindows()
-        if event == sg.WIN_CLOSED:
+        if event == sg.WIN_CLOSED or event == 'Parar Bot':
             sys.exit()
         if verificaTela():
             return False
@@ -190,22 +194,29 @@ def atualizaMsg(mensagem):
 
 def readWindows():
     global window, event, escolhas
-    window, event,escolhas = sg.read_all_windows(timeout=10)
-
-janela1, janela2 = janelaChampions(), None
-partidaIniciada = False
-window, event,escolhas = sg.read_all_windows()
+    window, event,escolhas = sg.read_all_windows(timeout=1)
 
 
-if event == sg.WIN_CLOSED:
+janela3 = janelaInicial()
+window, event,escolhas = sg.read_all_windows(timeout=5000)
+if event == sg.WINDOW_CLOSED:
     sys.exit()
+elif event.startswith("URL "):
+    webbrowser.open(url)
+janela3.close()
 
+janela1 = janelaChampions()
+window, event,escolhas = sg.read_all_windows()
+if event == sg.WINDOW_CLOSED:
+        sys.exit()
 janela2 = botTrabalhando()
 janela1.close()
 atualizaMsg('Aguardando encontrar partida para aceitar')
 readWindows()
 
+partidaIniciada = False
 while not partidaIniciada:
+    janela2.Element('_IMAGE_').UpdateAnimation('imgs/dwightPc.gif',  time_between_frames=0)
     if verificaTela():
         if verificaSeTodosAceitaram():
             img = declareChampion(escolhas['opcao1'])
