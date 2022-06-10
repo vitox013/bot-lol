@@ -17,7 +17,7 @@ def janelaInicial():
         [sg.Image('imgs/okTeemo.png')],
         [sg.Text('Vá lá buscar seu café que eu aceito a fila')]
     ]
-    return sg.Window('Queue Acceptor', layout, finalize=True,size=(360, 260), location=(-500, 300),element_padding=20, font=("Arial", 11), element_justification='c')
+    return sg.Window('Queue Acceptor', layout, finalize=True,size=(360, 260), location=(2, 300),element_padding=20, font=("Arial", 11), element_justification='c', icon=r'imgs/botIcon.ico')
 
 def janelaChampions():
     sg.theme("DarkBlue")
@@ -30,7 +30,7 @@ def janelaChampions():
         [sg.Input(key='ban')],
         [sg.Column([[sg.Button('Iniciar BOT', font="Arial, 11", bind_return_key=True, pad=(0, 10))]], justification='center')]
     ]
-    return sg.Window('Informe os Campeões', layout, finalize=True, size=(360, 260), location=(-500, 300), font=("Arial", 11), margins=(10, 20))
+    return sg.Window('Informe os Campeões', layout, finalize=True, size=(360, 260), location=(2, 300), font=("Arial", 11), margins=(10, 20),icon=r'imgs/botIcon.ico')
 
 def botTrabalhando():
     sg.theme("DarkBlue")
@@ -40,7 +40,7 @@ def botTrabalhando():
         [sg.Text('',key='mensagem')],
         [sg.Button('Parar Bot', button_color=('white', 'red'))]
     ]
-    return sg.Window('Bot rodando', layout, finalize=True, size=(360, 260),location=(-500, 300), element_padding=20, font="Arial, 11", element_justification='c')
+    return sg.Window('Bot rodando', layout, finalize=True, size=(360, 260),location=(2, 300), element_padding=20, font="Arial, 11", element_justification='c',icon=r'imgs/botIcon.ico')
 
 def easterEgg():
     sg.theme("DarkRed2")
@@ -49,7 +49,7 @@ def easterEgg():
         [sg.Text("NO MID IGUAL O CHRIS IRADO")],
         
     ]
-    return sg.Window('NAO FEEDE PFV', layout, finalize=True, size=(360, 260),location=(-500, 300), element_padding=30, font="Arial, 13", element_justification='c', margins=(0,0))
+    return sg.Window('NAO FEEDE PFV', layout, finalize=True, size=(360, 260),location=(2, 300), element_padding=30, font="Arial, 13", element_justification='c', margins=(0,0),icon=r'imgs/botIcon.ico')
 
 # ======================= BOT =================================
 def click(x, y):
@@ -230,7 +230,7 @@ escolhas = values
 if escolhas['opcao1'].lower() == 'yasuo':
     easter = easterEgg()
     window, event, escolhas = sg.read_all_windows(timeout=3000)
-easter.close()
+    easter.close()
 
 if event == sg.WINDOW_CLOSED:
         sys.exit()
