@@ -1,5 +1,7 @@
+from os import system
 from select import select
 from shutil import move
+from tkinter import EventType
 from weakref import finalize
 import pyautogui
 import time
@@ -61,6 +63,10 @@ def buttonConfirm():
     print("Champion selecionado")
 
 def verificaTela():
+    readWindows()
+    if event == sg.WIN_CLOSED:
+        sys.exit()
+    print('Procurando partida')
     button_pos = pyautogui.locateOnScreen('imgs/button.png', confidence=0.8)
     if button_pos != None:
         if button_pos != None:
@@ -69,18 +75,20 @@ def verificaTela():
             pyautogui.moveTo(button_pos.left -30, button_pos.top + 100)
             atualizaMsg("Partida encontrada e aceita")
         return True
+    print('nao achei')
     return False
 
 def verificaSeTodosAceitaram():
-    global event
     atualizaMsg("Verificando se todos aceitaram")
+    print('Verificando se todos aceitaram')
     while True:
+        readWindows()
+        if event == sg.WIN_CLOSED:
+            sys.exit()
         flag = pyautogui.locateOnScreen('imgs/flagTodosAceitaram.png', confidence=0.8)
         if flag != None:
             atualizaMsg('Todos aceitaram')
             return True
-        if event == sg.WIN_CLOSED:
-            sys.exit()
         flagNao = pyautogui.locateOnScreen('imgs/retornouFila.png', confidence=0.8)
         if flagNao != None:
             return False
@@ -91,10 +99,10 @@ def guardarImgChampion():
     return imgChampion
 
 def declareChampion(champion):
-    global event
     declareImg = pyautogui.locateOnScreen('imgs/declareChampion.png', confidence=0.8)
     while declareImg == None and not verificaTela():
         declareImg = pyautogui.locateOnScreen('imgs/declareChampion.png', confidence=0.8)
+        readWindows()
         if event == sg.WIN_CLOSED:
             sys.exit()
 
@@ -107,10 +115,11 @@ def declareChampion(champion):
     selectChampion()
     return img
    
-def banChampion(championBan, ):
+def banChampion(championBan):
     ban = pyautogui.locateOnScreen('imgs/ban.png', confidence=0.8)
     while ban == None and not verificaTela():
         ban = pyautogui.locateOnScreen('imgs/ban.png', confidence=0.8)
+        readWindows()
         if event == sg.WIN_CLOSED:
             sys.exit()
     time.sleep(2)
@@ -122,15 +131,18 @@ def banChampion(championBan, ):
     pyautogui.moveTo(ban.left, ban.top)
 
 def verificaSeChampFoiBanido(champion):
-    global event
-    aguardando = pyautogui.locateOnScreen('imgs/banimentosconfirmados.png', confidence=0.8)
     atualizaMsg('Aguardando as confirmacoes de ban')
-    while aguardando == None:
+    while True:
         aguardando = pyautogui.locateOnScreen('imgs/banimentosconfirmados.png', confidence=0.8)
+        readWindows()
         if event == sg.WIN_CLOSED:
             sys.exit()
+        if aguardando != None:
+            break
     atualizaMsg('Verificando se o champion foi banido')
+
     while True:
+        readWindows()
         if event == sg.WIN_CLOSED:
             sys.exit()
         img = pyautogui.locateOnScreen(champion, confidence=0.8)
@@ -143,15 +155,16 @@ def verificaSeChampFoiBanido(champion):
             return False
    
 def championSelect(opcao):
-    global event
     confirmar1 = pyautogui.locateOnScreen('imgs/escolha.png', confidence=0.8)
     atualizaMsg("Esperando minha vez para selecionar")
     while confirmar1 == None and not verificaTela():
+        readWindows()
         if event == sg.WIN_CLOSED:
             sys.exit()
         if verificaTela():
             return False
         confirmar1 = pyautogui.locateOnScreen('imgs/escolha.png', confidence=0.8)
+
     atualizaMsg('Minha vez de escolher um campeao')
     time.sleep(2)
     search()
@@ -172,30 +185,33 @@ def atualizaMsg(mensagem):
     global janela2
     janela2['mensagem'].update(mensagem)
 
+def readWindows():
+    global window, event, escolhas
+    window, event,escolhas = sg.read_all_windows(timeout=10)
 
 janela1, janela2 = janelaChampions(), None
 partidaIniciada = False
-while True:
-    window, event, values = sg.read_all_windows()
-    if event == sg.WIN_CLOSED:
-        sys.exit()
-    if window == janela1 and event == 'Iniciar BOT' and not partidaIniciada:
-        janela2 = botTrabalhando()
-        janela1.hide()
-        janela2['mensagem'].update('Aguardando encontrar partida para aceitar')
-        if verificaTela():
-            if verificaSeTodosAceitaram():
-                img = declareChampion(['opcao1'])
-                banChampion(values['ban'])
-                banido = verificaSeChampFoiBanido(img)
-                if banido == True:
-                    championSelect(values['opcao2'])
-                else:
-                    championSelect(values['opcao1'])
-                partidaIniciada = True
+window, event,escolhas = sg.read_all_windows()
 
 
-atualizaMsg("\tPartida iniciada, Boa partida!")
-print("\tApp será fechado!")
-time.sleep(3)
+if event == sg.WIN_CLOSED:
+    sys.exit()
+
+janela2 = botTrabalhando()
+janela1.close()
+atualizaMsg('Aguardando encontrar partida para aceitar')
+readWindows()
+
+while not partidaIniciada:
+    if verificaTela():
+        if verificaSeTodosAceitaram():
+            img = declareChampion(escolhas['opcao1'])
+            banChampion(escolhas['ban'])
+            banido = verificaSeChampFoiBanido(img)
+            if banido == True:
+                championSelect(escolhas['opcao2'])
+            else:
+                championSelect(escolhas['opcao1'])
+            partidaIniciada = True
+
 
