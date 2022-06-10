@@ -2,7 +2,6 @@ from select import select
 from shutil import move
 import pyautogui
 import time
-import keyboard
 
 
 def click(x, y):
@@ -116,8 +115,6 @@ def championSelect(opcao):
     buttonConfirm()
 
 def verificaInicio():
-    if keyboard.is_pressed("delete"):
-        return False
     image_pos = pyautogui.locateOnScreen('imgs/verificaInicio.png', confidence=0.8)
     image_pos2 = pyautogui.locateOnScreen('imgs/verificaInicio2.png', confidence=0.8)
     image_pos3 = pyautogui.locateOnScreen('imgs/verificaInicio3.png', confidence=0.8)
