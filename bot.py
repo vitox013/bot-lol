@@ -1,8 +1,7 @@
 from os import system
 from select import select
 from shutil import move
-from tkinter import EventType
-from weakref import finalize
+from numpy import size
 import pyautogui
 import time
 import PySimpleGUI as sg
@@ -18,22 +17,23 @@ def janelaChampions():
     sg.theme('Reddit')
     layout = [
         [sg.Text("Primeira opção de campeão:")],
-        [sg.Input(key='opcao1')],
-        [sg.Text("Segunda opção de campeão")],
+        [sg.Input(key='opcao1',)],
+        [sg.Text("Segunda opção de campeão:")],
         [sg.Input(key='opcao2')],
         [sg.Text("Banir quem?")],
         [sg.Input(key='ban')],
-        [sg.Button('Iniciar BOT')]
+        [sg.Button('Iniciar BOT', font="Arial, 11")]
     ]
-    return sg.Window('Principal', layout, finalize=True)
+    return sg.Window('Informe os Campeões', layout, finalize=True, size=(310, 260), location=(2, 300), element_justification='c',element_padding=5, font="Arial, 11")
 
 def botTrabalhando():
     sg.theme('Reddit')
     layout = [
         [sg.Text("Bot está trabalhando!")],
         [sg.Text('',key='mensagem')],
+        [sg.Button('Parar Bot', button_color=('white', 'red'), )]
     ]
-    return sg.Window('Secundaria', layout, finalize=True)
+    return sg.Window('Bot rodando', layout, finalize=True, size=(310, 260),location=(2, 300), element_justification='c', element_padding=5, font="Arial, 11")
 
 # ======================= BOT =================================
 def click(x, y):
@@ -99,6 +99,7 @@ def guardarImgChampion():
     return imgChampion
 
 def declareChampion(champion):
+    atualizaMsg('Declarando champion')
     declareImg = pyautogui.locateOnScreen('imgs/declareChampion.png', confidence=0.8)
     while declareImg == None and not verificaTela():
         declareImg = pyautogui.locateOnScreen('imgs/declareChampion.png', confidence=0.8)
@@ -116,6 +117,7 @@ def declareChampion(champion):
     return img
    
 def banChampion(championBan):
+    atualizaMsg('Banindo')
     ban = pyautogui.locateOnScreen('imgs/ban.png', confidence=0.8)
     while ban == None and not verificaTela():
         ban = pyautogui.locateOnScreen('imgs/ban.png', confidence=0.8)
@@ -184,6 +186,7 @@ def verificaInicio():
 def atualizaMsg(mensagem):
     global janela2
     janela2['mensagem'].update(mensagem)
+    readWindows()
 
 def readWindows():
     global window, event, escolhas
@@ -213,5 +216,11 @@ while not partidaIniciada:
             else:
                 championSelect(escolhas['opcao1'])
             partidaIniciada = True
+atualizaMsg('Partida será iniciada! Boa sorte!')
+time.sleep(3)
+atualizaMsg('Aplicativo será fechado! Até mais!')
+time.sleep(3)
+
+
 
 
