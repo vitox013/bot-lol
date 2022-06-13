@@ -1,6 +1,7 @@
-from os import system
+from os import listdir
 from select import select
 from shutil import move
+from tkinter import image_names
 from numpy import size
 import pyautogui
 import time
@@ -40,7 +41,7 @@ def botTrabalhando():
         [sg.Text('',key='mensagem')],
         [sg.Button('Parar Bot', button_color=('white', 'red'))]
     ]
-    return sg.Window('Bot rodando', layout, finalize=True, size=(360, 260),location=(2, 300), element_padding=15, font="Arial, 11", element_justification='c',icon=r'imgs/botIcon.ico')
+    return sg.Window('Bot rodando', layout, finalize=True, size=(360, 260),location=(2, 300), element_padding=10, font="Arial, 11", element_justification='c',icon=r'imgs/botIcon.ico')
 
 def easterEgg():
     sg.theme("DarkRed2")
@@ -52,42 +53,58 @@ def easterEgg():
     return sg.Window('NAO FEEDE PFV', layout, finalize=True, size=(360, 260),location=(2, 300), element_padding=30, font="Arial, 13", element_justification='c', margins=(0,0),icon=r'imgs/botIcon.ico')
 
 # ======================= BOT =================================
-def click(x, y):
-    pyautogui.moveTo(x, y)
+def click(x, y, m):
+    pyautogui.moveTo(x, y, m)
     pyautogui.click()
-    
+
+def locateOnScreen(imagem):
+    return pyautogui.locateOnScreen(imagem, confidence=0.8)
+
+def removeSuffix(inputString, suffix):
+    if suffix and inputString.endswith(suffix):
+        return inputString[:-len(suffix)]
+    return inputString
+
+def loadImages(dirPath='./imgs/'):
+    fileNames = listdir(dirPath)
+    targets = {}
+
+    for file in fileNames:
+        path = 'imgs/' + file
+        targets[removeSuffix(file, '.png')] = path
+    return targets
 
 def search():
-    buttonSearched = pyautogui.locateOnScreen('imgs/buttonSearch.png', confidence=0.8)
-    click(buttonSearched.left + 30, buttonSearched.top + 10)
+    buttonSearched = locateOnScreen(imagens['buttonSearch'])
+    click(buttonSearched.left + 30, buttonSearched.top + 10, 1)
 
 def selectChampion():
-    selectFirstChampion = pyautogui.locateOnScreen('imgs/topIcon.png', confidence=0.8)
+    selectFirstChampion = locateOnScreen(imagens['topIcon'])
     if selectFirstChampion != None:
         time.sleep(2)
-        click(selectFirstChampion.left + 30, selectFirstChampion.top + 60)
+        click(selectFirstChampion.left + 30, selectFirstChampion.top + 60, 1)
 
 def buttonBan():
     time.sleep(1)
-    buttonB = pyautogui.locateOnScreen('imgs/buttonBan.png', confidence=0.8)
-    click(buttonB.left + 50, buttonB.top + 30)
+    buttonB = locateOnScreen(imagens['buttonBan'])
+    click(buttonB.left + 50, buttonB.top + 30, 1)
 
 def buttonConfirm():
     time.sleep(1)
-    buttonC = pyautogui.locateOnScreen('imgs/buttonConfirmLigado.png', confidence=0.8)
-    click(buttonC.left + 50, buttonC.top + 30)
+    buttonC = locateOnScreen(imagens['buttonConfirmLigado'])
+    click(buttonC.left + 50, buttonC.top + 30, 1)
     atualizaMsg("Champion selecionado")
 
 def verificaTela():
     readWindows()
     if event == sg.WIN_CLOSED or event == 'Parar Bot':
         sys.exit()
-    button_pos = pyautogui.locateOnScreen('imgs/button.png', confidence=0.8)
+    button_pos = locateOnScreen(imagens['button'])
     if button_pos != None:
         if button_pos != None:
-            click(button_pos.left + 80, button_pos.top + 20)
+            click(button_pos.left + 80, button_pos.top + 20, 0)
             time.sleep(2)
-            pyautogui.moveTo(button_pos.left -30, button_pos.top + 100)
+            pyautogui.moveTo(button_pos.left -30, button_pos.top + 100,0)
             atualizaMsg("Partida encontrada e aceita")
         return True
     return False
@@ -98,43 +115,50 @@ def verificaSeTodosAceitaram():
         readWindows()
         if event == sg.WIN_CLOSED or event == 'Parar Bot':
             sys.exit()
-        flag = pyautogui.locateOnScreen('imgs/flagTodosAceitaram.png', confidence=0.8)
+        flag = locateOnScreen(imagens['flagTodosAceitaram'])
         if flag != None:
             atualizaMsg('Todos aceitaram')
             return True
-        flagNao = pyautogui.locateOnScreen('imgs/retornouFila.png', confidence=0.8)
-        if flagNao != None:
+        if voltouParaFila():
             atualizaMsg('Recusaram, aguardando partida para aceitar')
             return False
 
+def voltouParaFila():
+    flagFila = locateOnScreen(imagens['retornouFila'])
+    if flagFila != None:
+        return True
+    else:
+        return False
+        
 def guardarImgChampion():
-    champion = pyautogui.locateOnScreen('imgs/topIcon.png', confidence=0.8)
+    champion = locateOnScreen(imagens['topIcon'])
     imgChampion = pyautogui.screenshot(region=(champion.left + 2, champion.top + 36, 67, 55))
     return imgChampion
 
 def declareChampion(champion):
+    global imgOpcao1
     atualizaMsg('Declarando champion')
-    declareImg = pyautogui.locateOnScreen('imgs/declareChampion.png', confidence=0.8)
+    declareImg = locateOnScreen(imagens['declareChampion'])
     while declareImg == None and not verificaTela():
-        declareImg = pyautogui.locateOnScreen('imgs/declareChampion.png', confidence=0.8)
+        declareImg = locateOnScreen(imagens['declareChampion'])
         readWindows()
         if event == sg.WIN_CLOSED or event == 'Parar Bot':
             sys.exit()
-
-    time.sleep(2)    
+    time.sleep(1)    
     search()
     pyautogui.write(champion)
-    time.sleep(3)
-    img = guardarImgChampion()
-    time.sleep(1)
+    time.sleep(2)
+    if voltouParaFila():
+        return False
+    imgOpcao1 = guardarImgChampion()
     selectChampion()
-    return img
+    return True
    
 def banChampion(championBan):
     atualizaMsg('Banindo')
-    ban = pyautogui.locateOnScreen('imgs/ban.png', confidence=0.8)
+    ban = locateOnScreen(imagens['ban']) 
     while ban == None and not verificaTela():
-        ban = pyautogui.locateOnScreen('imgs/ban.png', confidence=0.8)
+        ban = locateOnScreen(imagens['ban']) 
         readWindows()
         if event == sg.WIN_CLOSED or event == 'Parar Bot':
             sys.exit()
@@ -144,12 +168,12 @@ def banChampion(championBan):
     selectChampion()
     time.sleep(3)
     buttonBan()
-    pyautogui.moveTo(ban.left, ban.top)
+    pyautogui.moveTo(ban.left, ban.top, 1)
 
 def verificaSeChampFoiBanido(champion):
     atualizaMsg('Aguardando as confirmacoes de ban')
     while True:
-        aguardando = pyautogui.locateOnScreen('imgs/banimentosconfirmados.png', confidence=0.8)
+        aguardando = locateOnScreen(imagens['banimentosconfirmados'])
         readWindows()
         if event == sg.WIN_CLOSED or event == 'Parar Bot':
             sys.exit()
@@ -162,7 +186,7 @@ def verificaSeChampFoiBanido(champion):
         if event == sg.WIN_CLOSED or event == 'Parar Bot':
             sys.exit()
         img = pyautogui.locateOnScreen(champion, confidence=0.8)
-        aguardando = pyautogui.locateOnScreen('imgs/banimentosconfirmados.png', confidence=0.8)
+        aguardando = locateOnScreen(imagens['banimentosconfirmados']) 
         if img != None:
             atualizaMsg('Seu champion foi banido')
             return True
@@ -171,22 +195,21 @@ def verificaSeChampFoiBanido(champion):
             return False
    
 def championSelect(opcao):
-    confirmar1 = pyautogui.locateOnScreen('imgs/escolha.png', confidence=0.8)
+    confirmar1 = locateOnScreen(imagens['escolha']) 
     atualizaMsg("Esperando minha vez para selecionar")
-    while confirmar1 == None and not verificaTela():
+    while confirmar1 == None:
         readWindows()
         if event == sg.WIN_CLOSED or event == 'Parar Bot':
             sys.exit()
-        if verificaTela():
+        if voltouParaFila():
             return False
-        confirmar1 = pyautogui.locateOnScreen('imgs/escolha.png', confidence=0.8)
+        confirmar1 = locateOnScreen(imagens['escolha']) 
 
     atualizaMsg('Minha vez de escolher um campeao')
-    time.sleep(2)
+    time.sleep(1)
     search()
     pyautogui.write(opcao)
     selectChampion()
-    time.sleep(2)
     buttonConfirm()
 
 def verificaInicio():
@@ -194,12 +217,12 @@ def verificaInicio():
         readWindows()
         if event == sg.WIN_CLOSED or event == 'Parar Bot':
             sys.exit()
-        retornouFila = pyautogui.locateOnScreen('imgs/retornouFila.png', confidence=0.8)
+        retornouFila = locateOnScreen(imagens['retornouFila']) 
         if retornouFila != None:
             return False
-        image_pos = pyautogui.locateOnScreen('imgs/verificaInicio.png', confidence=0.8)
-        image_pos2 = pyautogui.locateOnScreen('imgs/verificaInicio2.png', confidence=0.8)
-        image_pos3 = pyautogui.locateOnScreen('imgs/verificaInicio3.png', confidence=0.8)
+        image_pos = locateOnScreen(imagens['verificaInicio']) 
+        image_pos2 = locateOnScreen(imagens['verificaInicio2']) 
+        image_pos3 = locateOnScreen(imagens['verificaInicio3']) 
         if image_pos != None or image_pos2 != None or image_pos3 != None:
             return True
 
@@ -214,6 +237,9 @@ def readWindows():
     global values
     window, event, values = sg.read_all_windows(timeout=1)
 
+global imagens
+imgOpcao1 = None
+imagens = loadImages()
 
 janela3 = janelaInicial()
 window, event, escolhas = sg.read_all_windows(timeout=5000)
@@ -243,10 +269,10 @@ partidaIniciada = False
 while not partidaIniciada:
     if verificaTela():
         if verificaSeTodosAceitaram():
-            img = declareChampion(escolhas['opcao1'])
-            banChampion(escolhas['ban'])
-            banido = verificaSeChampFoiBanido(img)
-            if banido == True:
+            if declareChampion(escolhas['opcao1']):
+                banChampion(escolhas['ban'])
+                print(imgOpcao1)
+            if verificaSeChampFoiBanido(imgOpcao1):
                 championSelect(escolhas['opcao2'])
             else:
                 championSelect(escolhas['opcao1'])
@@ -256,7 +282,3 @@ atualizaMsg('Partida será iniciada! Boa sorte!')
 time.sleep(3)
 atualizaMsg('Aplicativo será fechado! Até mais!')
 time.sleep(3)
-
-
-
-
