@@ -40,7 +40,7 @@ def botTrabalhando():
         [sg.Text('',key='mensagem')],
         [sg.Button('Parar Bot', button_color=('white', 'red'))]
     ]
-    return sg.Window('Bot rodando', layout, finalize=True, size=(360, 260),location=(2, 300), element_padding=20, font="Arial, 11", element_justification='c',icon=r'imgs/botIcon.ico')
+    return sg.Window('Bot rodando', layout, finalize=True, size=(360, 260),location=(2, 300), element_padding=15, font="Arial, 11", element_justification='c',icon=r'imgs/botIcon.ico')
 
 def easterEgg():
     sg.theme("DarkRed2")
@@ -229,7 +229,7 @@ escolhas = values
 
 if escolhas['opcao1'].lower() == 'yasuo':
     easter = easterEgg()
-    window, event, escolhas = sg.read_all_windows(timeout=3000)
+    window, event, values = sg.read_all_windows(timeout=3000)
     easter.close()
 
 if event == sg.WINDOW_CLOSED:
