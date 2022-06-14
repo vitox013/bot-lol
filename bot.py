@@ -41,7 +41,7 @@ def botTrabalhando():
         [sg.Text('',key='mensagem')],
         [sg.Button('Parar Bot', button_color=('white', 'red'))]
     ]
-    return sg.Window('Bot rodando', layout, finalize=True, size=(360, 260),location=(2, 300), element_padding=10, font="Arial, 11", element_justification='c',icon=r'imgs/botIcon.ico')
+    return sg.Window('Bot rodando', layout, finalize=True, size=(360, 260),location=(-500, 300), element_padding=10, font="Arial, 11", element_justification='c',icon=r'imgs/botIcon.ico')
 
 def easterEgg():
     sg.theme("DarkRed2")
@@ -80,20 +80,25 @@ def search():
 
 def selectChampion():
     selectFirstChampion = locateOnScreen(imagens['topIcon'])
+    if voltouParaFila():
+        return False
     if selectFirstChampion != None:
-        time.sleep(2)
+        time.sleep(1)
         click(selectFirstChampion.left + 30, selectFirstChampion.top + 60, 1)
 
 def buttonBan():
-    time.sleep(1)
     buttonB = locateOnScreen(imagens['buttonBan'])
     click(buttonB.left + 50, buttonB.top + 30, 1)
 
 def buttonConfirm():
+    if voltouParaFila():
+        return False
     time.sleep(1)
     buttonC = locateOnScreen(imagens['buttonConfirmLigado'])
     click(buttonC.left + 50, buttonC.top + 30, 1)
-    atualizaMsg("Champion selecionado")
+
+def openGame():
+    pyautogui.press('win')
 
 def verificaTela():
     readWindows()
@@ -126,13 +131,17 @@ def verificaSeTodosAceitaram():
 def voltouParaFila():
     flagFila = locateOnScreen(imagens['retornouFila'])
     if flagFila != None:
+        atualizaMsg('Voltou p/ fila, aguardando partida')
         return True
     else:
         return False
         
 def guardarImgChampion():
+    global boxPlayer
     champion = locateOnScreen(imagens['topIcon'])
     imgChampion = pyautogui.screenshot(region=(champion.left + 2, champion.top + 36, 67, 55))
+    imgPlayer = locateOnScreen(imagens['barraLateral'])
+    boxPlayer = pyautogui.screenshot(region=(imgPlayer.left+20,imgPlayer.top+18, 200, 70))
     return imgChampion
 
 def declareChampion(champion):
@@ -162,39 +171,19 @@ def banChampion(championBan):
         readWindows()
         if event == sg.WIN_CLOSED or event == 'Parar Bot':
             sys.exit()
-    time.sleep(2)
+    time.sleep(1)
     search()
     pyautogui.write(championBan)
     selectChampion()
-    time.sleep(3)
     buttonBan()
     pyautogui.moveTo(ban.left, ban.top, 1)
+    if locateOnScreen(imagens['banirAliado']) != None:
+        bCanc = locateOnScreen(imagens['cancelarBan'])
+        print('Precisa cancelar ban')
+        click(bCanc.left + 20, bCanc.top + 10, 1)
+        
 
-def verificaSeChampFoiBanido(champion):
-    atualizaMsg('Aguardando as confirmacoes de ban')
-    while True:
-        aguardando = locateOnScreen(imagens['banimentosconfirmados'])
-        readWindows()
-        if event == sg.WIN_CLOSED or event == 'Parar Bot':
-            sys.exit()
-        if aguardando != None:
-            break
-    atualizaMsg('Verificando se o champion foi banido')
-
-    while True:
-        readWindows()
-        if event == sg.WIN_CLOSED or event == 'Parar Bot':
-            sys.exit()
-        img = pyautogui.locateOnScreen(champion, confidence=0.8)
-        aguardando = locateOnScreen(imagens['banimentosconfirmados']) 
-        if img != None:
-            atualizaMsg('Seu champion foi banido')
-            return True
-        if aguardando == None:
-            atualizaMsg('Seu champion não foi banido')
-            return False
-   
-def championSelect(opcao):
+def championSelect(opcao1, opcao2):
     confirmar1 = locateOnScreen(imagens['escolha']) 
     atualizaMsg("Esperando minha vez para selecionar")
     while confirmar1 == None:
@@ -207,8 +196,16 @@ def championSelect(opcao):
 
     atualizaMsg('Minha vez de escolher um campeao')
     time.sleep(1)
+    foiPickado = locateOnScreen(boxPlayer)
     search()
-    pyautogui.write(opcao)
+    if foiPickado != None:
+        pyautogui.write(opcao1) 
+        atualizaMsg(opcao1 + ' foi selecionado')
+        print(opcao1 + ' foi selecionado')
+    else:
+        pyautogui.write(opcao2)
+        atualizaMsg(opcao2 + ' foi selecionado')
+        print(opcao2 + ' foi selecionado')
     selectChampion()
     buttonConfirm()
 
@@ -239,6 +236,7 @@ def readWindows():
 
 global imagens
 imgOpcao1 = None
+boxPlayer = None
 imagens = loadImages()
 
 janela3 = janelaInicial()
@@ -271,11 +269,7 @@ while not partidaIniciada:
         if verificaSeTodosAceitaram():
             if declareChampion(escolhas['opcao1']):
                 banChampion(escolhas['ban'])
-                print(imgOpcao1)
-            if verificaSeChampFoiBanido(imgOpcao1):
-                championSelect(escolhas['opcao2'])
-            else:
-                championSelect(escolhas['opcao1'])
+                championSelect(escolhas['opcao1'], escolhas['opcao2'])
             if verificaInicio():
                 partidaIniciada = True
 atualizaMsg('Partida será iniciada! Boa sorte!')
