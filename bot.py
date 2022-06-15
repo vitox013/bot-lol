@@ -1,4 +1,5 @@
 from os import listdir
+from pydoc import locate
 from select import select
 from shutil import move
 from tkinter import image_names
@@ -34,10 +35,10 @@ def janelaChampions():
         [sg.Input(key='opcao2')],
         [sg.Text("Banir quem?")],
         [sg.Input(key='ban')],
-        [sg.Column([[sg.Button('Iniciar BOT', font="Arial, 11", bind_return_key=True, pad=(0, 10))]], justification='center')]
+        [sg.Column([[sg.Button('Iniciar BOT', font="Arial, 11", bind_return_key=True, pad=(0, 10),focus=True)]], justification='center')]
     ]
 
-    return sg.Window('Informe os Campeões', layout, finalize=True, size=(460, 360), location=(2, 300), font=("Arial", 11), margins=(10, 20),icon=r'imgs/botIcon.ico')
+    return sg.Window('Informe os Campeões', layout, finalize=True, size=(460, 500), location=(2, 300), font=("Arial", 11), margins=(10, 20),icon=r'imgs/botIcon.ico')
 
 def botTrabalhando():
     sg.theme("DarkBlue")
@@ -47,7 +48,7 @@ def botTrabalhando():
         [sg.Text('',key='mensagem')],
         [sg.Button('Parar Bot', button_color=('white', 'red'))]
     ]
-    return sg.Window('Bot rodando', layout, finalize=True, size=(360, 260),location=(-500, 300), element_padding=10, font="Arial, 11", element_justification='c',icon=r'imgs/botIcon.ico')
+    return sg.Window('Bot rodando', layout, finalize=True, size=(360, 260),location=(2, 300), element_padding=10, font="Arial, 11", element_justification='c',icon=r'imgs/botIcon.ico')
 
 def easterEgg():
     sg.theme("DarkRed2")
@@ -58,7 +59,7 @@ def easterEgg():
     ]
     return sg.Window('NAO FEEDE PFV', layout, finalize=True, size=(360, 260),location=(2, 300), element_padding=30, font="Arial, 13", element_justification='c', margins=(0,0),icon=r'imgs/botIcon.ico')
 
-# ======================= BOT =================================
+# ======================= FUNCÕES GENERICAS =================================
 def click(x, y, m):
     pyautogui.moveTo(x, y, m)
     pyautogui.click()
@@ -103,43 +104,139 @@ def buttonConfirm():
     buttonC = locateOnScreen(imagens['buttonConfirmLigado'])
     click(buttonC.left + 50, buttonC.top + 30, 1)
 
-def openGame():
-    pyautogui.press('win')
+def hideLanes():
+    global janela1
+    janela1['buttonConfirmLanes'].update(visible=False)
+    janela1['laneOptions'].update(visible=False)
 
+def attMsg(msg):
+    global janela1
+    janela1['msgLanes'].update(msg)
+
+# ======================= FUNÇÕES BOT RODANDO =================================
 def laneSelection():
     global window, event, values, janela1, imagens
 
-    lanesEsc = {}
-    escolheuSo2 = False
+    lanesEsc = []
+    
     while True:
-        while not escolheuSo2:
-            print('No loope escolheuSo2')
+        while True:
             if event == sg.WIN_CLOSED:
                 sys.exit()
             window,event,values = sg.read_all_windows()
             for x in values:
                 if values[x] == True:
-                    lanesEsc[x] = x
+                    lanesEsc.append(x)
             if len(lanesEsc) == 2:
                 if 'all' in lanesEsc:
-                    janela1['msgLanes'].update('Selecione só PREENCHER')
-                    lanesEsc = {}
-                    print('Contem all em lanesEsc')
+                    attMsg('Selecione só PREENCHER')
+                    lanesEsc = []
                 else:
-                    janela1['msgLanes'].update('Lanes confirmadas')
-                    janela1['buttonConfirmLanes'].update(visible=False)
-                    janela1['laneOptions'].update(visible=False)
-                    janela1['imgLane1'].update(imagens['top'])
-                    escolheuSo2 = True
-            print(lanesEsc)    
-        while event != 'Iniciar BOT':
-            print('Esperando iniciar bot')
-            window,event,values = sg.read_all_windows()
-            escolhas = values
-            if event == sg.WIN_CLOSED:
-                sys.exit()
-        return escolhas
+                    attMsg('Lanes confirmadas')
+                    hideLanes()
+                    janela1['imgLane1'].update(imagens[lanesEsc[0]])
+                    janela1['imgLane2'].update(imagens[lanesEsc[1]])
+                    return lanesEsc
+            elif len(lanesEsc) == 1 and 'all' in lanesEsc:
+                hideLanes()
+                attMsg('Lane confirmada')
+                janela1['imgLane1'].update(imagens[lanesEsc[0]])
+                return lanesEsc
+            else:
+                attMsg('Selecione 2 lanes ou somente PREENCHER')
+                lanesEsc = []
 
+def championChoices():
+    global window, event, values, janela1, imagens
+    while event != 'Iniciar BOT':
+        window,event,values = sg.read_all_windows()
+        escolhas = values
+        if event == sg.WIN_CLOSED:
+            sys.exit()
+    print(escolhas)
+    return escolhas
+
+def openGame():
+    pyautogui.press('win')
+    pyautogui.write('League of Legends')
+    time.sleep(1)
+    pyautogui.press('enter')
+
+def clickOnPlay():
+    atualizaMsg('Procurando botão JOGAR')
+    while True:
+        readWindows()
+        if event == sg.WIN_CLOSED or event == 'Parar Bot':
+            sys.exit()
+        buttonPlay = locateOnScreen(imagens['jogar'])
+        if buttonPlay != None:
+            click(buttonPlay.left + 20, buttonPlay.top + 10, 1)
+            break
+
+def selectMode():
+    atualizaMsg('Selecionando modo de jogo')
+    selecionou = False
+    while not selecionou:
+        readWindows()
+        if event == sg.WIN_CLOSED or event == 'Parar Bot':
+            sys.exit()
+        opcao = locateOnScreen(imagens['rankedSolo2'])
+        if opcao != None:
+            click(opcao.left + 50,opcao.top + 15, 1)
+            selecionou = True
+    while True:
+        readWindows()
+        if event == sg.WIN_CLOSED or event == 'Parar Bot':
+            sys.exit()
+        buttonC = locateOnScreen(imagens['initialConfirm'])
+        if buttonC != None:
+            click(buttonC.left + 130, buttonC.top + 10, 1)
+            break
+
+def verificaAvisoAutoFill():
+    time.sleep(1)
+    notShow = locateOnScreen(imagens['notShowAgain'])
+    readWindows()
+    if event == sg.WIN_CLOSED or event == 'Parar Bot':
+            sys.exit()
+    if notShow != None:
+        click(notShow.left + 20, notShow.top + 5, 1)
+    imgEntendido = locateOnScreen(imagens['avisoAutoFill'])
+    if imgEntendido != None:
+        click(imgEntendido.left + 20, imgEntendido.top + 10, 1)
+
+def selecionarLanes():
+    while True:
+        readWindows()
+        if event == sg.WIN_CLOSED or event == 'Parar Bot':
+            sys.exit()
+        lane1 = locateOnScreen(imagens['laneSelect'])
+        click(lane1.left - 15, lane1.top + 10, 1)
+        time.sleep(0.5)
+        imgLane1 = locateOnScreen(imagens[laneEsc[0]])
+        if laneEsc[0] == 'all':
+            click(imgLane1.left + 5, imgLane1.top + 10, 1)
+            break
+        else:
+            click(imgLane1.left, imgLane1.top + 10, 1)
+            click(lane1.left + 10, lane1.top + 10, 1)
+            time.sleep(0.5)
+            imgLane2 = locateOnScreen(imagens[laneEsc[1]])
+            click(imgLane2.left + 5, imgLane2.top + 10, 1)
+            break
+
+def verificarSePodeStartar():
+    imgButton = locateOnScreen(imagens['encontrarPartida'])
+    if imgButton != None:
+        return True
+    else:
+        return False
+    
+def iniciarVerificaTela():
+    imgButton = locateOnScreen(imagens['encontrarPartida'])
+    if imgButton != None:
+        click(imgButton.left + 20, imgButton.top + 20, 1)
+        
 def verificaTela():
     readWindows()
     if event == sg.WIN_CLOSED or event == 'Parar Bot':
@@ -269,16 +366,13 @@ def atualizaMsg(mensagem):
     readWindows()
 
 def readWindows():
-    global window 
-    global event 
-    global values
+    global window, event, values
     window, event, values = sg.read_all_windows(timeout=1)
 
 global imagens
 imgOpcao1 = None
 boxPlayer = None
 imagens = loadImages()
-
 janela3 = janelaInicial()
 window, event, values = sg.read_all_windows(timeout=5000)
 if event == sg.WINDOW_CLOSED:
@@ -288,21 +382,35 @@ elif event.startswith("URL "):
 janela3.close()
 
 janela1 = janelaChampions()
-escolhas = laneSelection()
+
+if not verificarSePodeStartar():
+    laneEsc = laneSelection()
+    escolhas = championChoices()
+    openGame()
+    clickOnPlay()
+    selectMode()
+    time.sleep(1)
+    verificaAvisoAutoFill()
+    selecionarLanes()
+    iniciarVerificaTela()
+else:
+    hideLanes()
+    escolhas = championChoices()
+    iniciarVerificaTela()
+
+janela2 = botTrabalhando()
+janela1.close()
 
 if escolhas['opcao1'].lower() == 'yasuo':
     easter = easterEgg()
     window, event, values = sg.read_all_windows(timeout=3000)
     easter.close()
-
 if event == sg.WINDOW_CLOSED:
         sys.exit()
-janela2 = botTrabalhando()
-janela1.close()
+
 atualizaMsg('Aguardando encontrar partida para aceitar')
 readWindows()
 partidaIniciada = False
-
 while not partidaIniciada:
     if verificaTela():
         if verificaSeTodosAceitaram():
