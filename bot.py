@@ -23,6 +23,11 @@ def janelaInicial():
 def janelaChampions():
     sg.theme("DarkBlue")
     layout = [
+        [sg.Column([[sg.Checkbox('', key='top',pad=(0,0)), sg.Image('imgs/top.png',pad=((0,20),0)), sg.Checkbox('', key='jungle',pad=(0,0)), sg.Image('imgs/jungle.png',pad=((0,20),0)), sg.Checkbox('', key='mid',pad=(0,0)), sg.Image('imgs/mid.png',pad=((0,20),0)), sg.Checkbox('', key='botlane',pad=(0,0)), sg.Image('imgs/botlane.png',pad=((0,20),0)), sg.Checkbox('', key='sup',pad=(0,0)), sg.Image('imgs/sup.png',pad=((0,20),0)), sg.Checkbox('', key='all',pad=(0,0)), sg.Image('imgs/all.png',pad=((0,20),0))]],visible=True ,key='laneOptions')],
+
+        [sg.Column([[sg.Button('Confirmar Lanes', font="Arial, 11", bind_return_key=True)]], justification='center', visible=True, key='buttonConfirmLanes')],
+        [sg.Column([[sg.Text('',key='msgLanes')]], justification='center')],
+        [sg.Column([[sg.Image('',key='imgLane1'),sg.Image('',key='imgLane2')]], justification='center')],
         [sg.Text("Primeira opção de campeão:")],
         [sg.Input(key='opcao1')],
         [sg.Text("Segunda opção de campeão(caso 1° seja banido):")],
@@ -31,7 +36,8 @@ def janelaChampions():
         [sg.Input(key='ban')],
         [sg.Column([[sg.Button('Iniciar BOT', font="Arial, 11", bind_return_key=True, pad=(0, 10))]], justification='center')]
     ]
-    return sg.Window('Informe os Campeões', layout, finalize=True, size=(360, 260), location=(2, 300), font=("Arial", 11), margins=(10, 20),icon=r'imgs/botIcon.ico')
+
+    return sg.Window('Informe os Campeões', layout, finalize=True, size=(460, 360), location=(2, 300), font=("Arial", 11), margins=(10, 20),icon=r'imgs/botIcon.ico')
 
 def botTrabalhando():
     sg.theme("DarkBlue")
@@ -99,6 +105,40 @@ def buttonConfirm():
 
 def openGame():
     pyautogui.press('win')
+
+def laneSelection():
+    global window, event, values, janela1, imagens
+
+    lanesEsc = {}
+    escolheuSo2 = False
+    while True:
+        while not escolheuSo2:
+            print('No loope escolheuSo2')
+            if event == sg.WIN_CLOSED:
+                sys.exit()
+            window,event,values = sg.read_all_windows()
+            for x in values:
+                if values[x] == True:
+                    lanesEsc[x] = x
+            if len(lanesEsc) == 2:
+                if 'all' in lanesEsc:
+                    janela1['msgLanes'].update('Selecione só PREENCHER')
+                    lanesEsc = {}
+                    print('Contem all em lanesEsc')
+                else:
+                    janela1['msgLanes'].update('Lanes confirmadas')
+                    janela1['buttonConfirmLanes'].update(visible=False)
+                    janela1['laneOptions'].update(visible=False)
+                    janela1['imgLane1'].update(imagens['top'])
+                    escolheuSo2 = True
+            print(lanesEsc)    
+        while event != 'Iniciar BOT':
+            print('Esperando iniciar bot')
+            window,event,values = sg.read_all_windows()
+            escolhas = values
+            if event == sg.WIN_CLOSED:
+                sys.exit()
+        return escolhas
 
 def verificaTela():
     readWindows()
@@ -240,7 +280,7 @@ boxPlayer = None
 imagens = loadImages()
 
 janela3 = janelaInicial()
-window, event, escolhas = sg.read_all_windows(timeout=5000)
+window, event, values = sg.read_all_windows(timeout=5000)
 if event == sg.WINDOW_CLOSED:
     sys.exit()
 elif event.startswith("URL "):
@@ -248,8 +288,7 @@ elif event.startswith("URL "):
 janela3.close()
 
 janela1 = janelaChampions()
-window,event,values = sg.read_all_windows()
-escolhas = values
+escolhas = laneSelection()
 
 if escolhas['opcao1'].lower() == 'yasuo':
     easter = easterEgg()
