@@ -24,9 +24,10 @@ def janelaInicial():
 def janelaChampions():
     sg.theme("DarkBlue")
     layout = [
-        [sg.Column([[sg.Checkbox('', key='top',pad=(0,0)), sg.Image('imgs/top.png',pad=((0,20),0)), sg.Checkbox('', key='jungle',pad=(0,0)), sg.Image('imgs/jungle.png',pad=((0,20),0)), sg.Checkbox('', key='mid',pad=(0,0)), sg.Image('imgs/mid.png',pad=((0,20),0)), sg.Checkbox('', key='botlane',pad=(0,0)), sg.Image('imgs/botlane.png',pad=((0,20),0)), sg.Checkbox('', key='sup',pad=(0,0)), sg.Image('imgs/sup.png',pad=((0,20),0)), sg.Checkbox('', key='all',pad=(0,0)), sg.Image('imgs/all.png',pad=((0,20),0))]],visible=True ,key='laneOptions')],
+        [sg.Text('Selecione a 1° lane',key='mensagemLane')],
+        [sg.Column([[sg.Radio('','lanes', key='top',pad=(0,0)), sg.Image('imgs/top.png',pad=((0,20),0)), sg.Radio('', 'lanes', key='jungle',pad=(0,0)), sg.Image('imgs/jungle.png',pad=((0,20),0)), sg.Radio('', 'lanes',key='mid',pad=(0,0)), sg.Image('imgs/mid.png',pad=((0,20),0)), sg.Radio('', 'lanes', key='botlane',pad=(0,0)), sg.Image('imgs/botlane.png',pad=((0,20),0)), sg.Radio('', 'lanes', key='sup',pad=(0,0)), sg.Image('imgs/sup.png',pad=((0,20),0)), sg.Radio('', 'lanes', key='all',pad=(0,0)), sg.Image('imgs/all.png',pad=((0,20),0))]],visible=True ,key='laneOptions')],
 
-        [sg.Column([[sg.Button('Confirmar Lanes', font="Arial, 11", bind_return_key=True)]], justification='center', visible=True, key='buttonConfirmLanes')],
+        [sg.Column([[sg.Button('Confirmar Lane', font="Arial, 11", bind_return_key=True)]], justification='center', visible=True, key='buttonConfirmLanes')],
         [sg.Column([[sg.Text('',key='msgLanes')]], justification='center')],
         [sg.Column([[sg.Image('',key='imgLane1'),sg.Image('',key='imgLane2')]], justification='center')],
         [sg.Text("Primeira opção de campeão:")],
@@ -374,7 +375,7 @@ imgOpcao1 = None
 boxPlayer = None
 imagens = loadImages()
 janela3 = janelaInicial()
-window, event, values = sg.read_all_windows(timeout=5000)
+window, event, values = sg.read_all_windows(timeout=1000)
 if event == sg.WINDOW_CLOSED:
     sys.exit()
 elif event.startswith("URL "):
