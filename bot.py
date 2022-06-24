@@ -3,7 +3,7 @@ from pydoc import locate
 from select import select
 from shutil import move
 from tkinter import image_names
-from numpy import size
+from numpy import datetime_data, size
 import pyautogui
 import time
 import PySimpleGUI as sg
@@ -24,7 +24,7 @@ def janelaInicial():
 def janelaChampions():
     sg.theme("DarkBlue")
     layout = [
-        [sg.Text('Selecione a 1° lane',key='mensagemLane')],
+        [sg.Text('Selecione lane principal',key='mensagemLane')],
         [sg.Column([[sg.Radio('','lanes', key='top',pad=(0,0)), sg.Image('imgs/top.png',pad=((0,20),0)), sg.Radio('', 'lanes', key='jungle',pad=(0,0)), sg.Image('imgs/jungle.png',pad=((0,20),0)), sg.Radio('', 'lanes',key='mid',pad=(0,0)), sg.Image('imgs/mid.png',pad=((0,20),0)), sg.Radio('', 'lanes', key='botlane',pad=(0,0)), sg.Image('imgs/botlane.png',pad=((0,20),0)), sg.Radio('', 'lanes', key='sup',pad=(0,0)), sg.Image('imgs/sup.png',pad=((0,20),0)), sg.Radio('', 'lanes', key='all',pad=(0,0)), sg.Image('imgs/all.png',pad=((0,20),0))]],visible=True ,key='laneOptions')],
 
         [sg.Column([[sg.Button('Confirmar Lane', font="Arial, 11", bind_return_key=True)]], justification='center', visible=True, key='buttonConfirmLanes')],
@@ -39,7 +39,7 @@ def janelaChampions():
         [sg.Column([[sg.Button('Iniciar BOT', font="Arial, 11", bind_return_key=True, pad=(0, 10),focus=True)]], justification='center')]
     ]
 
-    return sg.Window('Informe os Campeões', layout, finalize=True, size=(460, 500), location=(2, 300), font=("Arial", 11), margins=(10, 20),icon=r'imgs/botIcon.ico')
+    return sg.Window('Informe os Campeões', layout, finalize=True, size=(460, 500), location=(2, 300), font=("Arial", 11), margins=(10, 20),icon=r'imgs/botIcon.ico',element_justification='c')
 
 def botTrabalhando():
     sg.theme("DarkBlue")
@@ -50,15 +50,6 @@ def botTrabalhando():
         [sg.Button('Parar Bot', button_color=('white', 'red'))]
     ]
     return sg.Window('Bot rodando', layout, finalize=True, size=(360, 260),location=(2, 300), element_padding=10, font="Arial, 11", element_justification='c',icon=r'imgs/botIcon.ico')
-
-def easterEgg():
-    sg.theme("DarkRed2")
-    layout = [
-        [sg.Text("POR FAVOR NAO FEEDE DE YASUO")],
-        [sg.Text("NO MID IGUAL O CHRIS IRADO")],
-        
-    ]
-    return sg.Window('NAO FEEDE PFV', layout, finalize=True, size=(360, 260),location=(2, 300), element_padding=30, font="Arial, 13", element_justification='c', margins=(0,0),icon=r'imgs/botIcon.ico')
 
 # ======================= FUNCÕES GENERICAS =================================
 def click(x, y, m):
@@ -115,37 +106,53 @@ def attMsg(msg):
     janela1['msgLanes'].update(msg)
 
 # ======================= FUNÇÕES BOT RODANDO =================================
+def verificaSeJogoAberto():
+    jogoAberto = locateOnScreen(imagens['verificaJogoAberto.png'])
+    if jogoAberto != None:
+        print('Jogo já está aberto')
+        return True
+    return False
+
 def laneSelection():
     global window, event, values, janela1, imagens
 
     lanesEsc = []
-    
-    while True:
+    if not verificarSePodeStartar():
         while True:
-            if event == sg.WIN_CLOSED:
-                sys.exit()
-            window,event,values = sg.read_all_windows()
-            for x in values:
-                if values[x] == True:
-                    lanesEsc.append(x)
-            if len(lanesEsc) == 2:
-                if 'all' in lanesEsc:
-                    attMsg('Selecione só PREENCHER')
-                    lanesEsc = []
-                else:
-                    attMsg('Lanes confirmadas')
-                    hideLanes()
-                    janela1['imgLane1'].update(imagens[lanesEsc[0]])
-                    janela1['imgLane2'].update(imagens[lanesEsc[1]])
-                    return lanesEsc
-            elif len(lanesEsc) == 1 and 'all' in lanesEsc:
-                hideLanes()
-                attMsg('Lane confirmada')
-                janela1['imgLane1'].update(imagens[lanesEsc[0]])
-                return lanesEsc
-            else:
-                attMsg('Selecione 2 lanes ou somente PREENCHER')
-                lanesEsc = []
+            
+            while True:
+                if event == sg.WIN_CLOSED:
+                    sys.exit()
+                window,event,values = sg.read_all_windows()
+                attMsg('')
+                for x in values:
+                    if values[x] == True:
+                        lanesEsc.append(x)
+                if len(lanesEsc) == 1:
+                    if 'all' in lanesEsc:
+                        attMsg('Lane confirmada')
+                        janela1['mensagemLane'].update('')
+                        hideLanes()
+                        janela1['imgLane1'].update(imagens[lanesEsc[0]])
+                        return lanesEsc
+                    else:
+                        janela1['mensagemLane'].update('Selecione lane secundária')
+                elif len(lanesEsc) == 2:
+                    if lanesEsc[0] == lanesEsc[1]:
+                        janela1['mensagemLane'].update('Selecione lane principal novamente')
+                        attMsg('Selecione Lanes Diferentes')
+                        lanesEsc = []
+                    else:
+                        janela1['mensagemLane'].update('')
+                        attMsg('Lanes confirmadas')
+                        hideLanes()
+                        janela1['imgLane1'].update(imagens[lanesEsc[0]])
+                        janela1['imgLane2'].update(imagens[lanesEsc[1]])
+                        return lanesEsc
+    else:
+        hideLanes()
+        janela1['mensagemLane'].update('')
+
 
 def championChoices():
     global window, event, values, janela1, imagens
@@ -154,7 +161,6 @@ def championChoices():
         escolhas = values
         if event == sg.WIN_CLOSED:
             sys.exit()
-    print(escolhas)
     return escolhas
 
 def openGame():
@@ -229,8 +235,10 @@ def selecionarLanes():
 def verificarSePodeStartar():
     imgButton = locateOnScreen(imagens['encontrarPartida'])
     if imgButton != None:
+        print('Usuario já selecionou lane')
         return True
     else:
+        print('Usuario não selecionou lane')
         return False
     
 def iniciarVerificaTela():
@@ -383,11 +391,14 @@ elif event.startswith("URL "):
 janela3.close()
 
 janela1 = janelaChampions()
+laneEsc = laneSelection()
+escolhas = championChoices()
+janela2 = botTrabalhando()
+janela1.close()
 
 if not verificarSePodeStartar():
-    laneEsc = laneSelection()
-    escolhas = championChoices()
-    openGame()
+    if not verificaSeJogoAberto:
+        openGame()
     clickOnPlay()
     selectMode()
     time.sleep(1)
@@ -395,19 +406,7 @@ if not verificarSePodeStartar():
     selecionarLanes()
     iniciarVerificaTela()
 else:
-    hideLanes()
-    escolhas = championChoices()
     iniciarVerificaTela()
-
-janela2 = botTrabalhando()
-janela1.close()
-
-if escolhas['opcao1'].lower() == 'yasuo':
-    easter = easterEgg()
-    window, event, values = sg.read_all_windows(timeout=3000)
-    easter.close()
-if event == sg.WINDOW_CLOSED:
-        sys.exit()
 
 atualizaMsg('Aguardando encontrar partida para aceitar')
 readWindows()
