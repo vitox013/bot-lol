@@ -24,7 +24,7 @@ def janelaInicial():
 def janelaChampions():
     sg.theme("DarkBlue")
     layout = [
-        [sg.Text('Selecione lane principal',key='mensagemLane')],
+        [sg.Text('Selecione lane principal',key='mensagemLane', font=('Arial',16, 'underline'),)],
         [sg.Column([[sg.Radio('','lanes', key='top',pad=(0,0)), sg.Image('imgs/top.png',pad=((0,20),0)), sg.Radio('', 'lanes', key='jungle',pad=(0,0)), sg.Image('imgs/jungle.png',pad=((0,20),0)), sg.Radio('', 'lanes',key='mid',pad=(0,0)), sg.Image('imgs/mid.png',pad=((0,20),0)), sg.Radio('', 'lanes', key='botlane',pad=(0,0)), sg.Image('imgs/botlane.png',pad=((0,20),0)), sg.Radio('', 'lanes', key='sup',pad=(0,0)), sg.Image('imgs/sup.png',pad=((0,20),0)), sg.Radio('', 'lanes', key='all',pad=(0,0)), sg.Image('imgs/all.png',pad=((0,20),0))]],visible=True ,key='laneOptions')],
 
         [sg.Column([[sg.Button('Confirmar Lane', font="Arial, 11", bind_return_key=True)]], justification='center', visible=True, key='buttonConfirmLanes')],
@@ -107,7 +107,7 @@ def attMsg(msg):
 
 # ======================= FUNÇÕES BOT RODANDO =================================
 def verificaSeJogoAberto():
-    jogoAberto = locateOnScreen(imagens['verificaJogoAberto.png'])
+    jogoAberto = locateOnScreen(imagens['verificaJogoAberto'])
     if jogoAberto != None:
         print('Jogo já está aberto')
         return True
@@ -397,7 +397,7 @@ janela2 = botTrabalhando()
 janela1.close()
 
 if not verificarSePodeStartar():
-    if not verificaSeJogoAberto:
+    if not verificaSeJogoAberto():
         openGame()
     clickOnPlay()
     selectMode()
