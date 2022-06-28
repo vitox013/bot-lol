@@ -183,6 +183,8 @@ def laneSelection():
                         attMsg('Lane confirmada')
                         janela1['mensagemLane'].update('')
                         hideLanes()
+                        showModos()
+                        precisaModo = True
                         janela1['imgLane1'].update(imagens[lanesEsc[0]])
                         return lanesEsc
                     else:
