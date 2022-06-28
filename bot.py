@@ -32,9 +32,9 @@ def janelaChampions():
         [sg.Column([[sg.Text('', key='msgLanes')]], visible=False, key='msgLanes1',justification='center')],
         [sg.Column([[sg.Image('',key='imgLane1'),sg.Image('',key='imgLane2')]], visible=False, key='imgLanes',justification='center')],
         [sg.Column([[sg.Text('Selecione modo de jogo', font=('Arial',16, 'underline'))]], visible=True,key='msgGrandeModo')],
-        [sg.Radio('Escolha alternada', 'modosDeJogo', visible=True,key='escolhaAlternada', pad=((0,5),0))],
-        [sg.Radio('Ranqueada solo/duo', 'modosDeJogo',visible=True, key='soloDuo',pad=((13,0),0))],
-        [sg.Radio('Ranqueada flexível', 'modosDeJogo',visible=True, key='flex')],
+        [sg.Radio('Escolha alternada', 'modosDeJogo', disabled=True,key='escolhaAlternada', pad=((0,5),0))],
+        [sg.Radio('Ranqueada solo/duo', 'modosDeJogo',disabled=True, key='soloDuo',pad=((13,0),0))],
+        [sg.Radio('Ranqueada flexível', 'modosDeJogo',disabled=True, key='flex')],
         [sg.Text("Primeira opção de campeão:")],
         [sg.Input(key='opcao1')],
         [sg.Text("Segunda opção de campeão(caso 1° seja banido):")],
@@ -112,22 +112,15 @@ def hideLanes():
 
 def hideModos():
     global janela1
-    janela1['escolhaAlternada'].update(visible=False)
-
-    janela1['msgGrandeModo'].update(visible=False)
-
-    janela1['flex'].update(visible=False)
-
-    janela1['soloDuo'].update(visible=False)
-
+    janela1['escolhaAlternada'].update(disabled=True)
+    janela1['flex'].update(disabled=True)
+    janela1['soloDuo'].update(disabled=True)
 
 def showModos():
     global janela1
-    janela1['escolhaAlternada'].update(visible=True)
-    janela1['msgGrandeModo'].update(visible=True)
-    janela1['flex'].update(visible=True)
-    janela1['soloDuo'].update(visible=True)
-
+    janela1['escolhaAlternada'].update(disabled=False)
+    janela1['flex'].update(disabled=False)
+    janela1['soloDuo'].update(disabled=False)
 
 def attMsg(msg):
     global janela1
@@ -219,7 +212,6 @@ def laneSelection():
         hideLanes()
         hideModos()
         janela1['mensagemLane'].update('')
-
 
 def championChoices():
     global window, event, values, janela1, imagens
@@ -514,7 +506,6 @@ def main():
             if not verificarSePodeStartar():
                 selecionarLanes()
     
-
     iniciarVerificaTela()
     atualizaMsg('Aguardando encontrar partida para aceitar')
     readWindows()
