@@ -15,4 +15,7 @@ Não precisará esperar encontrar uma partida para ir no banheiro ou pegar café
   * opencv-python
   * cx_freeze
 
+## Download
+* [Clique aqui](https://github.com/vitox013/bot-lol/releases/tag/v3.0.2) para baixar.
+
 Basta extrair o arquivo e executar o bot.exe!
