@@ -514,7 +514,7 @@ def main():
             verificaAvisoAutoFill()
             selecionarLanes()
         elif situacao == 'no saguao':
-            if not verificarSePodeStartar():
+            if locateOnScreen(imagens['laneSelectFixed']) != None:
                 selecionarLanes()
     
     iniciarVerificaTela()

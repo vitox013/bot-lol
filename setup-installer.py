@@ -10,7 +10,7 @@ setup(
     name="Bot Fila",
     options = {"build_exe":{"packages": ["os"], "includes": ["tkinter"], "include_files": ["imgs/", "LICENSE", "README.md"]},
     "bdist_msi": {'summary_data':bdist_msi_options}},
-    version="4.0.1",
+    version="4.0.2",
     description="Lol queue acceptor",
     executables=[Executable("bot.py", 
     shortcut_name="Bot Fila",
