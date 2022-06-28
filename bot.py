@@ -26,7 +26,7 @@ def janelaChampions():
         [sg.Column([[sg.Button('Confirmar Lane', font="Arial, 11", bind_return_key=True)]], justification='center', visible=True, key='buttonConfirmLanes')],
         [sg.Column([[sg.Text('', key='msgLanes')]], visible=False, key='msgLanes1',justification='center')],
         [sg.Column([[sg.Image('',key='imgLane1'),sg.Image('',key='imgLane2')]], visible=False, key='imgLanes',justification='center')],
-        [sg.Column([[sg.Text('Selecione modo de jogo', font=('Arial',16, 'underline'))]], visible=True,key='msgGrandeModo')],
+        [sg.Column([[sg.Text('Selecione modo de jogo', font=('Arial',16, 'underline'),key='msgModo')]], visible=True,key='msgGrandeModo')],
         [sg.Radio('Escolha alternada', 'modosDeJogo', disabled=True,key='escolhaAlternada', pad=((0,5),0))],
         [sg.Radio('Ranqueada solo/duo', 'modosDeJogo',disabled=True, key='soloDuo',pad=((13,0),0))],
         [sg.Radio('Ranqueada flexível', 'modosDeJogo',disabled=True, key='flex')],
@@ -164,11 +164,12 @@ def verificaSitAtual():
         return 'no saguao'
 
 def laneSelection():
-    global window, event, values, janela1, imagens
+    global window, event, values, janela1, imagens, precisaModo
     lanesEsc = []
     if not verificarSePodeStartar() or locateOnScreen(imagens['laneSelect']) != None:
         if locateOnScreen(imagens['telaModoJogo']) == None and locateOnScreen(imagens['saguao']) != None or locateOnScreen(imagens['grupo']) != None:
             hideModos()
+            janela1['msgModo'].update('Modo de jogo já selecionado')
         while True:
             hideModos()
             while True:
@@ -196,8 +197,11 @@ def laneSelection():
                         attMsg('Lanes confirmadas')
                         if locateOnScreen(imagens['saguao']) == None:
                             showModos()
+                            precisaModo = True
                         if locateOnScreen(imagens['grupo']) != None:
                             hideModos()
+                            janela1['msgModo'].update('Modo de jogo já selecionado')
+                            precisaModo = False
                         hideLanes()
                         janela1['Iniciar BOT'].update(visible=True)
                         janela1['imgLane1'].update(imagens[lanesEsc[0]])
@@ -206,15 +210,25 @@ def laneSelection():
     else:
         hideLanes()
         hideModos()
+        janela1['msgModo'].update('Modo de jogo já selecionado')
+        precisaModo = False
         janela1['mensagemLane'].update('')
 
 def championChoices():
-    global window, event, values, janela1, imagens
+    global window, event, values, janela1, imagens, precisaModo
     while event != 'Iniciar BOT':
         window,event,values = sg.read_all_windows()
         escolhas = values
         eventListenerFecharJogo()
-    return escolhas
+        print(escolhas)
+        if precisaModo:
+            if escolhas['escolhaAlternada'] == True or escolhas['soloDuo'] == True or escolhas['flex'] == True:
+                return escolhas
+            else:
+                janela1['msgModo'].update('SELECIONE MODO DE JOGO')
+                event = None
+        
+    
 
 def openGame():
     pyautogui.press('win')
@@ -450,12 +464,13 @@ def readWindows():
     global window, event, values
     window, event, values = sg.read_all_windows(timeout=1)
 
-global imagens
+global imagens, precisaModo
+precisaModo = False
 imgOpcao1 = None
 boxPlayer = None
 imagens = loadImages()
 janela3 = janelaInicial()
-window, event, values = sg.read_all_windows(timeout=1000)
+window, event, values = sg.read_all_windows(timeout=5000)
 if event == sg.WINDOW_CLOSED:
     sys.exit()
 elif event.startswith("URL "):
@@ -467,7 +482,7 @@ laneEsc = laneSelection()
 escolhas = championChoices()
 janela2 = botTrabalhando()
 janela1.close()
-print(escolhas)
+
 def main():    
     if not jogoAberto():
         atualizaMsg('Abrindo o jogo')
@@ -483,7 +498,6 @@ def main():
     if verificaSeJogoAberto():
         time.sleep(2)
         situacao = verificaSitAtual()
-        print(situacao)
         if situacao == 'clicar em play':
             clickOnPlay()
             selectMode()
