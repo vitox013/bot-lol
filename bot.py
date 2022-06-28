@@ -1,9 +1,4 @@
 from os import listdir
-from pydoc import locate, visiblename
-from select import select
-from shutil import move
-from tkinter import image_names
-from numpy import datetime_data, size
 import pyautogui
 import time
 import PySimpleGUI as sg
