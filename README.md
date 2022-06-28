@@ -5,7 +5,11 @@ Não precisará esperar encontrar uma partida para ir no banheiro ou pegar café
 
 ## Download
 * ### Instalador
-  * #### [Clique aqui](https://github.com/vitox013/bot-lol/releases/tag/v4.0.0) para baixar o instalador.
+  * #### [Clique aqui](https://github.com/vitox013/bot-lol/releases/tag/v4.0.0) para baixar o instalador. 
+* ### Antivirus 
+  * #### Provavelmente o Windows Defender Smart Screen irá informar que protegeu o computador, pois o programa não possui certificado (tem que pagar), basta clicar em "Mais informações" e clicar em "Executar assim mesmo".
+* ### Código fonte aberto.
+  #### Como o código é aberto, você poderá conferir o código fonte por si mesmo, caso se sinta inseguro em instalar.
   
 ## Compilar (ignore caso vá usar o instalador)
 ### Caso queira compilar por conta própria, basta:
