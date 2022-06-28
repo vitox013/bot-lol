@@ -1,5 +1,5 @@
 from os import listdir
-from pydoc import locate
+from pydoc import locate, visiblename
 from select import select
 from shutil import move
 from tkinter import image_names
@@ -9,6 +9,7 @@ import time
 import PySimpleGUI as sg
 import sys
 import webbrowser
+import pygetwindow
 
 url = 'https://github.com/vitox013'
 
@@ -24,22 +25,22 @@ def janelaInicial():
 def janelaChampions():
     sg.theme("DarkBlue")
     layout = [
-        [sg.Text('Selecione lane principal',key='mensagemLane', font=('Arial',16, 'underline'),)],
+        [sg.Column([[sg.Text('Selecione lane principal',key='mensagemLane', font=('Arial',16, 'underline'))]], visible=True, key='msgGrandes')],
         [sg.Column([[sg.Radio('','lanes', key='top',pad=(0,0)), sg.Image('imgs/top.png',pad=((0,20),0)), sg.Radio('', 'lanes', key='jungle',pad=(0,0)), sg.Image('imgs/jungle.png',pad=((0,20),0)), sg.Radio('', 'lanes',key='mid',pad=(0,0)), sg.Image('imgs/mid.png',pad=((0,20),0)), sg.Radio('', 'lanes', key='botlane',pad=(0,0)), sg.Image('imgs/botlane.png',pad=((0,20),0)), sg.Radio('', 'lanes', key='sup',pad=(0,0)), sg.Image('imgs/sup.png',pad=((0,20),0)), sg.Radio('', 'lanes', key='all',pad=(0,0)), sg.Image('imgs/all.png',pad=((0,20),0))]],visible=True ,key='laneOptions')],
 
         [sg.Column([[sg.Button('Confirmar Lane', font="Arial, 11", bind_return_key=True)]], justification='center', visible=True, key='buttonConfirmLanes')],
-        [sg.Column([[sg.Text('',key='msgLanes')]], justification='center')],
-        [sg.Column([[sg.Image('',key='imgLane1'),sg.Image('',key='imgLane2')]], justification='center')],
+        [sg.Column([[sg.Text('', key='msgLanes')]], visible=False, key='msgLanes1',justification='center')],
+        [sg.Column([[sg.Image('',key='imgLane1'),sg.Image('',key='imgLane2')]], visible=False, key='imgLanes',justification='center')],
         [sg.Text("Primeira opção de campeão:")],
         [sg.Input(key='opcao1')],
         [sg.Text("Segunda opção de campeão(caso 1° seja banido):")],
         [sg.Input(key='opcao2')],
         [sg.Text("Banir quem?")],
         [sg.Input(key='ban')],
-        [sg.Column([[sg.Button('Iniciar BOT', font="Arial, 11", bind_return_key=True, pad=(0, 10),focus=True)]], justification='center')]
+        [sg.Column([[sg.Button('Iniciar BOT', font="Arial, 11", bind_return_key=True, visible=False,pad=(0, 10),focus=True)]], justification='center')]
     ]
 
-    return sg.Window('Informe os Campeões', layout, finalize=True, size=(460, 500), location=(2, 300), font=("Arial", 11), margins=(10, 20),icon=r'imgs/botIcon.ico',element_justification='c')
+    return sg.Window('Informe os Campeões', layout, finalize=True,  location=(2, 300), font=("Arial", 11), margins=(10, 20),icon=r'imgs/botIcon.ico',element_justification='c')
 
 def botTrabalhando():
     sg.theme("DarkBlue")
@@ -99,11 +100,54 @@ def buttonConfirm():
 def hideLanes():
     global janela1
     janela1['buttonConfirmLanes'].update(visible=False)
+    janela1['buttonConfirmLanes'].hide_row()
     janela1['laneOptions'].update(visible=False)
+    janela1['laneOptions'].hide_row()
+    janela1['msgGrandes'].update(visible=False)
+    janela1['msgGrandes'].hide_row()
+
+def hideModos():
+    global janela1
+    janela1['escolhaAlternada'].update(visible=False)
+
+    janela1['msgGrandeModo'].update(visible=False)
+
+    janela1['flex'].update(visible=False)
+
+    janela1['soloDuo'].update(visible=False)
+
+
+def showModos():
+    global janela1
+    janela1['escolhaAlternada'].update(visible=True)
+    janela1['msgGrandeModo'].update(visible=True)
+    janela1['flex'].update(visible=True)
+    janela1['soloDuo'].update(visible=True)
+
 
 def attMsg(msg):
     global janela1
     janela1['msgLanes'].update(msg)
+    janela1['msgLanes1'].update(visible=True)
+    janela1['imgLanes'].update(visible=True)
+
+def eventListenerFecharJogo():
+    global event
+    if event == sg.WIN_CLOSED or event == 'Parar Bot':
+        sys.exit()
+
+def jogoAberto():
+    title = 'League of Legends'
+
+    window = pygetwindow.getWindowsWithTitle(title=title)
+    if window == []:
+        print('Jogo não está aberto')
+        return False
+    else:
+        window = pygetwindow.getWindowsWithTitle(title=title)[0]
+        window.restore()
+        return True
+
 
 # ======================= FUNÇÕES BOT RODANDO =================================
 def verificaSeJogoAberto():
@@ -113,18 +157,31 @@ def verificaSeJogoAberto():
         return True
     return False
 
+def verificaSitAtual():
+    if locateOnScreen(imagens['jogar']) != None:
+        print('Precisa clicar em play')
+        return 'clicar em play'
+    elif locateOnScreen(imagens['grupo']) != None:
+        print('Precisa clicar em grupo')
+        return 'grupo'
+    elif locateOnScreen(imagens['telaModoJogo']) != None:
+        print('Precisar selecionar modo')
+        return 'selecionar modo'
+    elif locateOnScreen(imagens['saguao']) != None:
+        print('Está no saguao')
+        return 'no saguao'
+
 def laneSelection():
     global window, event, values, janela1, imagens
-
     lanesEsc = []
-    if not verificarSePodeStartar():
+    if not verificarSePodeStartar() or locateOnScreen(imagens['laneSelect']) != None:
+        if locateOnScreen(imagens['telaModoJogo']) == None and locateOnScreen(imagens['saguao']) != None or locateOnScreen(imagens['grupo']) != None:
+            hideModos()
         while True:
-            
+            hideModos()
             while True:
-                if event == sg.WIN_CLOSED:
-                    sys.exit()
+                eventListenerFecharJogo()
                 window,event,values = sg.read_all_windows()
-                attMsg('')
                 for x in values:
                     if values[x] == True:
                         lanesEsc.append(x)
@@ -145,12 +202,18 @@ def laneSelection():
                     else:
                         janela1['mensagemLane'].update('')
                         attMsg('Lanes confirmadas')
+                        if locateOnScreen(imagens['saguao']) == None:
+                            showModos()
+                        if locateOnScreen(imagens['grupo']) != None:
+                            hideModos()
                         hideLanes()
+                        janela1['Iniciar BOT'].update(visible=True)
                         janela1['imgLane1'].update(imagens[lanesEsc[0]])
                         janela1['imgLane2'].update(imagens[lanesEsc[1]])
                         return lanesEsc
     else:
         hideLanes()
+        hideModos()
         janela1['mensagemLane'].update('')
 
 
@@ -159,8 +222,7 @@ def championChoices():
     while event != 'Iniciar BOT':
         window,event,values = sg.read_all_windows()
         escolhas = values
-        if event == sg.WIN_CLOSED:
-            sys.exit()
+        eventListenerFecharJogo()
     return escolhas
 
 def openGame():
@@ -168,33 +230,42 @@ def openGame():
     pyautogui.write('League of Legends')
     time.sleep(1)
     pyautogui.press('enter')
-
+    
 def clickOnPlay():
-    atualizaMsg('Procurando botão JOGAR')
+    atualizaMsg('Clicando em JOGAR')
     while True:
         readWindows()
-        if event == sg.WIN_CLOSED or event == 'Parar Bot':
-            sys.exit()
+        eventListenerFecharJogo()
         buttonPlay = locateOnScreen(imagens['jogar'])
         if buttonPlay != None:
             click(buttonPlay.left + 20, buttonPlay.top + 10, 1)
             break
 
 def selectMode():
+    global escolhas
     atualizaMsg('Selecionando modo de jogo')
     selecionou = False
+    time.sleep(2)
     while not selecionou:
         readWindows()
-        if event == sg.WIN_CLOSED or event == 'Parar Bot':
-            sys.exit()
-        opcao = locateOnScreen(imagens['rankedSolo2'])
-        if opcao != None:
-            click(opcao.left + 50,opcao.top + 15, 1)
+        eventListenerFecharJogo()
+        if escolhas['escolhaAlternada']:
+            opcao = locateOnScreen(imagens['alternada'])
+            click(opcao.left, opcao.top + 10, 1)
             selecionou = True
+        elif escolhas['soloDuo']:
+            opcao = locateOnScreen(imagens['rankedSolo3'])
+            click(opcao.left, opcao.top + 10, 1)
+            selecionou = True
+        elif escolhas['flex']:
+            opcao = locateOnScreen(imagens['rankedFlex'])
+            click(opcao.left + 20, opcao.top + 10, 1)
+            selecionou = True
+
     while True:
+        print('Procurando botao confirmar')
         readWindows()
-        if event == sg.WIN_CLOSED or event == 'Parar Bot':
-            sys.exit()
+        eventListenerFecharJogo()
         buttonC = locateOnScreen(imagens['initialConfirm'])
         if buttonC != None:
             click(buttonC.left + 130, buttonC.top + 10, 1)
@@ -204,8 +275,7 @@ def verificaAvisoAutoFill():
     time.sleep(1)
     notShow = locateOnScreen(imagens['notShowAgain'])
     readWindows()
-    if event == sg.WIN_CLOSED or event == 'Parar Bot':
-            sys.exit()
+    eventListenerFecharJogo()
     if notShow != None:
         click(notShow.left + 20, notShow.top + 5, 1)
     imgEntendido = locateOnScreen(imagens['avisoAutoFill'])
@@ -213,43 +283,59 @@ def verificaAvisoAutoFill():
         click(imgEntendido.left + 20, imgEntendido.top + 10, 1)
 
 def selecionarLanes():
-    while True:
-        readWindows()
-        if event == sg.WIN_CLOSED or event == 'Parar Bot':
-            sys.exit()
-        lane1 = locateOnScreen(imagens['laneSelect'])
-        click(lane1.left - 15, lane1.top + 10, 1)
-        time.sleep(0.5)
-        imgLane1 = locateOnScreen(imagens[laneEsc[0]])
-        if laneEsc[0] == 'all':
-            click(imgLane1.left + 5, imgLane1.top + 10, 1)
-            break
-        else:
-            click(imgLane1.left, imgLane1.top + 10, 1)
-            click(lane1.left + 10, lane1.top + 10, 1)
+    atualizaMsg('Selecionando as lanes')
+    lane1 = locateOnScreen(imagens['laneSelect'])
+
+    if lane1 != None:
+        while True:
+            readWindows()
+            eventListenerFecharJogo()
+            click(lane1.left - 15, lane1.top + 10, 1)
             time.sleep(0.5)
-            imgLane2 = locateOnScreen(imagens[laneEsc[1]])
-            click(imgLane2.left + 5, imgLane2.top + 10, 1)
-            break
+            imgLane1 = locateOnScreen(imagens[laneEsc[0]])
+            if laneEsc[0] == 'all':
+                click(imgLane1.left + 5, imgLane1.top + 10, 1)
+                break
+            else:
+                click(imgLane1.left, imgLane1.top + 10, 1)
+                click(lane1.left + 10, lane1.top + 10, 1)
+                time.sleep(0.5)
+                imgLane2 = locateOnScreen(imagens[laneEsc[1]])
+                click(imgLane2.left + 5, imgLane2.top + 10, 1)
+                break
 
 def verificarSePodeStartar():
-    imgButton = locateOnScreen(imagens['encontrarPartida'])
+    global janela1
+    imgButton = pyautogui.locateOnScreen('imgs/encontrarPartida.png', confidence=0.9)
     if imgButton != None:
         print('Usuario já selecionou lane')
+        janela1['Iniciar BOT'].update(visible=True)
         return True
     else:
         print('Usuario não selecionou lane')
         return False
-    
+
+def aguardandoGrupo():
+    atualizaMsg('Voltando pro saguao')
+    imgGrupo = locateOnScreen(imagens['grupo'])
+    findMatch = locateOnScreen(imagens['encontrarPartida'])
+    click(imgGrupo.left + 20, imgGrupo.top + 5, 1)
+    time.sleep(2)
+    imgLane = locateOnScreen(imagens['laneSelectFixed'])
+    if imgLane != None:
+        selecionarLanes()
+
 def iniciarVerificaTela():
+
     imgButton = locateOnScreen(imagens['encontrarPartida'])
     if imgButton != None:
-        click(imgButton.left + 20, imgButton.top + 20, 1)
+        click(imgButton.left + 80, imgButton.top + 10, 1)
+    else:
+        print('Aguardando o Lider da sala iniciar')
         
 def verificaTela():
     readWindows()
-    if event == sg.WIN_CLOSED or event == 'Parar Bot':
-        sys.exit()
+    eventListenerFecharJogo()
     button_pos = locateOnScreen(imagens['button'])
     if button_pos != None:
         if button_pos != None:
@@ -264,8 +350,7 @@ def verificaSeTodosAceitaram():
     atualizaMsg("Verificando se todos aceitaram")
     while True:
         readWindows()
-        if event == sg.WIN_CLOSED or event == 'Parar Bot':
-            sys.exit()
+        eventListenerFecharJogo()
         flag = locateOnScreen(imagens['flagTodosAceitaram'])
         if flag != None:
             atualizaMsg('Todos aceitaram')
@@ -297,8 +382,7 @@ def declareChampion(champion):
     while declareImg == None and not verificaTela():
         declareImg = locateOnScreen(imagens['declareChampion'])
         readWindows()
-        if event == sg.WIN_CLOSED or event == 'Parar Bot':
-            sys.exit()
+        eventListenerFecharJogo()
     time.sleep(1)    
     search()
     pyautogui.write(champion)
@@ -315,8 +399,7 @@ def banChampion(championBan):
     while ban == None and not verificaTela():
         ban = locateOnScreen(imagens['ban']) 
         readWindows()
-        if event == sg.WIN_CLOSED or event == 'Parar Bot':
-            sys.exit()
+        eventListenerFecharJogo()
     time.sleep(1)
     search()
     pyautogui.write(championBan)
@@ -334,8 +417,7 @@ def championSelect(opcao1, opcao2):
     atualizaMsg("Esperando minha vez para selecionar")
     while confirmar1 == None:
         readWindows()
-        if event == sg.WIN_CLOSED or event == 'Parar Bot':
-            sys.exit()
+        eventListenerFecharJogo()
         if voltouParaFila():
             return False
         confirmar1 = locateOnScreen(imagens['escolha']) 
@@ -358,8 +440,7 @@ def championSelect(opcao1, opcao2):
 def verificaInicio():
     while True:
         readWindows()
-        if event == sg.WIN_CLOSED or event == 'Parar Bot':
-            sys.exit()
+        eventListenerFecharJogo()
         retornouFila = locateOnScreen(imagens['retornouFila']) 
         if retornouFila != None:
             return False
@@ -395,31 +476,57 @@ laneEsc = laneSelection()
 escolhas = championChoices()
 janela2 = botTrabalhando()
 janela1.close()
-
-if not verificarSePodeStartar():
-    if not verificaSeJogoAberto():
+print(escolhas)
+def main():    
+    if not jogoAberto():
+        atualizaMsg('Abrindo o jogo')
         openGame()
-    clickOnPlay()
-    selectMode()
-    time.sleep(1)
-    verificaAvisoAutoFill()
-    selecionarLanes()
-    iniciarVerificaTela()
-else:
-    iniciarVerificaTela()
+        while not verificaSeJogoAberto():
+            readWindows()
+            eventListenerFecharJogo()
+        while locateOnScreen(imagens['jogar']) == None:
+            print('Procurando botão play ficar disponivel')
+            readWindows()
+            eventListenerFecharJogo()
+        print('Botao play ficou disponivel')
+    if verificaSeJogoAberto():
+        time.sleep(2)
+        situacao = verificaSitAtual()
+        print(situacao)
+        if situacao == 'clicar em play':
+            clickOnPlay()
+            selectMode()
+            time.sleep(1)
+            verificaAvisoAutoFill()
+            selecionarLanes()
+        elif situacao == 'grupo':
+            aguardandoGrupo()
+        elif situacao == 'selecionar modo':
+            selectMode()
+            time.sleep(1)
+            verificaAvisoAutoFill()
+            selecionarLanes()
+        elif situacao == 'no saguao':
+            if not verificarSePodeStartar():
+                selecionarLanes()
+    
 
-atualizaMsg('Aguardando encontrar partida para aceitar')
-readWindows()
-partidaIniciada = False
-while not partidaIniciada:
-    if verificaTela():
-        if verificaSeTodosAceitaram():
-            if declareChampion(escolhas['opcao1']):
-                banChampion(escolhas['ban'])
-                championSelect(escolhas['opcao1'], escolhas['opcao2'])
-            if verificaInicio():
-                partidaIniciada = True
-atualizaMsg('Partida será iniciada! Boa sorte!')
-time.sleep(3)
-atualizaMsg('Aplicativo será fechado! Até mais!')
-time.sleep(3)
+    iniciarVerificaTela()
+    atualizaMsg('Aguardando encontrar partida para aceitar')
+    readWindows()
+
+    partidaIniciada = False
+    while not partidaIniciada:
+        if verificaTela():
+            if verificaSeTodosAceitaram():
+                if declareChampion(escolhas['opcao1']):
+                    banChampion(escolhas['ban'])
+                    championSelect(escolhas['opcao1'], escolhas['opcao2'])
+                if verificaInicio():
+                    partidaIniciada = True
+    atualizaMsg('Partida será iniciada! Boa sorte!')
+    time.sleep(3)
+    atualizaMsg('Aplicativo será fechado! Até mais!')
+    time.sleep(3)
+
+main()
