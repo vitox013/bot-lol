@@ -223,7 +223,6 @@ def championChoices():
         window,event,values = sg.read_all_windows()
         escolhas = values
         eventListenerFecharJogo()
-        print(escolhas)
         if precisaModo:
             if escolhas['escolhaAlternada'] == True or escolhas['soloDuo'] == True or escolhas['flex'] == True:
                 return escolhas
@@ -383,9 +382,6 @@ def guardarImgChampion():
     imgChampion = pyautogui.screenshot(region=(champion.left + 2, champion.top + 36, 67, 55))
     imgPlayer = locateOnScreen(imagens['barraLateral'])
     boxPlayer = pyautogui.screenshot(region=(imgPlayer.left + 7,imgPlayer.top+18, 87, 70))
-    print(imgPlayer)
-    boxPlayer.save(r'C:\Users\vitor\Desktop\boxplayer.png')
-    print('salvei imagem')
     time.sleep(10)
     return imgChampion
 
@@ -534,7 +530,6 @@ while not partidaIniciada:
     if verificaTela():
         if verificaSeTodosAceitaram():
             time.sleep(1)
-            print(escolhas)
             if declareChampion(escolhas['opcao1']):
                 banChampion(escolhas['ban'])
                 championSelect(escolhas['opcao1'], escolhas['opcao2'])
