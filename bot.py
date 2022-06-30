@@ -36,7 +36,7 @@ def janelaChampions():
         [sg.Input(key='opcao2')],
         [sg.Text("Banir quem?")],
         [sg.Input(key='ban')],
-        [sg.Column([[sg.Button('Iniciar BOT', font="Arial, 11", bind_return_key=True, visible=False,pad=(0, 10),focus=True)]], justification='center')]
+        [sg.Column([[sg.Button('Iniciar BOT', font="Arial, 11", bind_return_key=True, visible=False,pad=(0, 10))]], justification='center')]
     ]
 
     return sg.Window('Informe os Campeões', layout, finalize=True,  location=(2, 300), font=("Arial", 11), margins=(10, 20),icon=r'imgs/botIcon.ico',element_justification='c')
@@ -185,6 +185,7 @@ def laneSelection():
                         hideLanes()
                         showModos()
                         precisaModo = True
+                        janela1['Iniciar BOT'].update(visible=True)
                         janela1['imgLane1'].update(imagens[lanesEsc[0]])
                         return lanesEsc
                     else:
@@ -229,6 +230,8 @@ def championChoices():
             else:
                 janela1['msgModo'].update('SELECIONE MODO DE JOGO')
                 event = None
+        elif not precisaModo:
+            return escolhas
         
     
 
@@ -379,7 +382,11 @@ def guardarImgChampion():
     champion = locateOnScreen(imagens['topIcon'])
     imgChampion = pyautogui.screenshot(region=(champion.left + 2, champion.top + 36, 67, 55))
     imgPlayer = locateOnScreen(imagens['barraLateral'])
-    boxPlayer = pyautogui.screenshot(region=(imgPlayer.left+20,imgPlayer.top+18, 200, 70))
+    boxPlayer = pyautogui.screenshot(region=(imgPlayer.left + 7,imgPlayer.top+18, 87, 70))
+    print(imgPlayer)
+    boxPlayer.save(r'C:\Users\vitor\Desktop\boxplayer.png')
+    print('salvei imagem')
+    time.sleep(10)
     return imgChampion
 
 def declareChampion(champion):
@@ -420,6 +427,7 @@ def banChampion(championBan):
         
 
 def championSelect(opcao1, opcao2):
+    global boxPlayer
     confirmar1 = locateOnScreen(imagens['escolha']) 
     atualizaMsg("Esperando minha vez para selecionar")
     while confirmar1 == None:
@@ -434,13 +442,13 @@ def championSelect(opcao1, opcao2):
     foiPickado = locateOnScreen(boxPlayer)
     search()
     if foiPickado != None:
-        pyautogui.write(opcao1) 
-        atualizaMsg(opcao1 + ' foi selecionado')
-        print(opcao1 + ' foi selecionado')
-    else:
-        pyautogui.write(opcao2)
+        pyautogui.write(opcao2) 
         atualizaMsg(opcao2 + ' foi selecionado')
         print(opcao2 + ' foi selecionado')
+    else:
+        pyautogui.write(opcao1)
+        atualizaMsg(opcao1 + ' foi selecionado')
+        print(opcao1 + ' foi selecionado')
     selectChampion()
     buttonConfirm()
 
@@ -485,54 +493,54 @@ escolhas = championChoices()
 janela2 = botTrabalhando()
 janela1.close()
 
-def main():    
-    if not jogoAberto():
-        atualizaMsg('Abrindo o jogo')
-        openGame()
-        while not verificaSeJogoAberto():
-            readWindows()
-            eventListenerFecharJogo()
-        while locateOnScreen(imagens['jogar']) == None:
-            print('Procurando botão play ficar disponivel')
-            readWindows()
-            eventListenerFecharJogo()
-        print('Botao play ficou disponivel')
-    if verificaSeJogoAberto():
-        time.sleep(2)
-        situacao = verificaSitAtual()
-        if situacao == 'clicar em play':
-            clickOnPlay()
-            selectMode()
-            time.sleep(1)
-            verificaAvisoAutoFill()
-            selecionarLanes()
-        elif situacao == 'grupo':
-            aguardandoGrupo()
-        elif situacao == 'selecionar modo':
-            selectMode()
-            time.sleep(1)
-            verificaAvisoAutoFill()
-            selecionarLanes()
-        elif situacao == 'no saguao':
-            if locateOnScreen(imagens['laneSelectFixed']) != None:
-                selecionarLanes()
-    
-    iniciarVerificaTela()
-    atualizaMsg('Aguardando encontrar partida para aceitar')
-    readWindows()
 
-    partidaIniciada = False
-    while not partidaIniciada:
-        if verificaTela():
-            if verificaSeTodosAceitaram():
-                if declareChampion(escolhas['opcao1']):
-                    banChampion(escolhas['ban'])
-                    championSelect(escolhas['opcao1'], escolhas['opcao2'])
-                if verificaInicio():
-                    partidaIniciada = True
-    atualizaMsg('Partida será iniciada! Boa sorte!')
-    time.sleep(3)
-    atualizaMsg('Aplicativo será fechado! Até mais!')
-    time.sleep(3)
+if not jogoAberto():
+    atualizaMsg('Abrindo o jogo')
+    openGame()
+    while not verificaSeJogoAberto():
+        readWindows()
+        eventListenerFecharJogo()
+    while locateOnScreen(imagens['jogar']) == None:
+        print('Procurando botão play ficar disponivel')
+        readWindows()
+        eventListenerFecharJogo()
+    print('Botao play ficou disponivel')
+if verificaSeJogoAberto():
+    time.sleep(2)
+    situacao = verificaSitAtual()
+    if situacao == 'clicar em play':
+        clickOnPlay()
+        selectMode()
+        time.sleep(1)
+        verificaAvisoAutoFill()
+        selecionarLanes()
+    elif situacao == 'grupo':
+        aguardandoGrupo()
+    elif situacao == 'selecionar modo':
+        selectMode()
+        time.sleep(1)
+        verificaAvisoAutoFill()
+        selecionarLanes()
+    elif situacao == 'no saguao':
+        if locateOnScreen(imagens['laneSelectFixed']) != None:
+            selecionarLanes()
 
-main()
+iniciarVerificaTela()
+atualizaMsg('Aguardando encontrar partida para aceitar')
+readWindows()
+
+partidaIniciada = False
+while not partidaIniciada:
+    if verificaTela():
+        if verificaSeTodosAceitaram():
+            time.sleep(1)
+            print(escolhas)
+            if declareChampion(escolhas['opcao1']):
+                banChampion(escolhas['ban'])
+                championSelect(escolhas['opcao1'], escolhas['opcao2'])
+            if verificaInicio():
+                partidaIniciada = True
+atualizaMsg('Partida será iniciada! Boa sorte!')
+time.sleep(3)
+atualizaMsg('Aplicativo será fechado! Até mais!')
+time.sleep(3)
