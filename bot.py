@@ -166,7 +166,7 @@ def verificaSitAtual():
 def laneSelection():
     global window, event, values, janela1, imagens, precisaModo
     lanesEsc = []
-    if not verificarSePodeStartar() or locateOnScreen(imagens['laneSelect']) != None:
+    if (not verificarSePodeStartar() or locateOnScreen(imagens['laneSelect']) != None) and not locateOnScreen(imagens['naFila']) != None:
         if locateOnScreen(imagens['telaModoJogo']) == None and locateOnScreen(imagens['saguao']) != None or locateOnScreen(imagens['grupo']) != None:
             hideModos()
             janela1['msgModo'].update('Modo de jogo já selecionado')
@@ -214,6 +214,7 @@ def laneSelection():
         hideLanes()
         hideModos()
         janela1['msgModo'].update('Modo de jogo já selecionado')
+        janela1['Iniciar BOT'].update(visible=True)
         precisaModo = False
         janela1['mensagemLane'].update('')
 
@@ -393,14 +394,16 @@ def declareChampion(champion):
         declareImg = locateOnScreen(imagens['declareChampion'])
         readWindows()
         eventListenerFecharJogo()
-    time.sleep(1)    
-    search()
-    pyautogui.write(champion)
-    time.sleep(2)
-    if voltouParaFila():
-        return False
-    imgOpcao1 = guardarImgChampion()
-    selectChampion()
+    if champion != "":
+        time.sleep(1)    
+        search()
+        pyautogui.write(champion)
+        time.sleep(2)
+        if voltouParaFila():
+            return False
+        imgOpcao1 = guardarImgChampion()
+        selectChampion()
+        return True
     return True
    
 def banChampion(championBan):
@@ -437,16 +440,22 @@ def championSelect(opcao1, opcao2):
     time.sleep(1)
     foiPickado = locateOnScreen(boxPlayer)
     search()
-    if foiPickado != None:
-        pyautogui.write(opcao2) 
-        atualizaMsg(opcao2 + ' foi selecionado')
-        print(opcao2 + ' foi selecionado')
+    if opcao1 != "" or opcao2 != "":
+        if foiPickado != None or opcao1 == "" and opcao2 != "":
+            pyautogui.write(opcao2) 
+            atualizaMsg(opcao2 + ' foi selecionado')
+            print(opcao2 + ' foi selecionado')
+            selectChampion()
+            buttonConfirm()
+        elif foiPickado != None and opcao2 == "":
+            atualizaMsg("Voce precisa escolher")
+        else:
+            pyautogui.write(opcao1)
+            atualizaMsg(opcao1 + ' foi selecionado')
+            print(opcao1 + ' foi selecionado')
     else:
-        pyautogui.write(opcao1)
-        atualizaMsg(opcao1 + ' foi selecionado')
-        print(opcao1 + ' foi selecionado')
-    selectChampion()
-    buttonConfirm()
+        atualizaMsg('Voce precisa escolher')
+
 
 def verificaInicio():
     while True:
