@@ -492,6 +492,8 @@ elif event.startswith("URL "):
     webbrowser.open(url)
 janela3.close()
 
+jogoAberto()
+
 janela1 = janelaChampions()
 laneEsc = laneSelection()
 escolhas = championChoices()
